@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ICH — Sistema de Objetivos</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ── Reset y variables ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rojo:      #e53e3e;
+      --amarillo:  #d69e2e;
+      --verde:     #38a169;
+      --gris:      #718096;
+      --azul:      #3182ce;
+      --azul-dark: #2b6cb0;
+      --bg:        #f7fafc;
+      --card:      #ffffff;
+      --borde:     #e2e8f0;
+      --texto:     #2d3748;
+      --texto-2:   #718096;
+      --radio:     8px;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--texto);
+      min-height: 100vh;
+    }
+
+    /* ── Pantalla de login ─────────────────────────────── */
+    #pantalla-login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+    }
+
+    .login-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .login-logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a365d;
+    }
+
+    .login-logo p {
+      font-size: 13px;
+      color: var(--texto-2);
+      margin-top: 4px;
+    }
+
+    /* ── Formularios generales ─────────────────────────── */
+    .campo { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--texto);
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      font-size: 14px;
+      color: var(--texto);
+      background: #fff;
+      transition: border-color .2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--azul);
+      box-shadow: 0 0 0 3px rgba(49,130,206,.15);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--radio);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+    }
+
+    .btn:hover  { opacity: .88; }
+    .btn:active { transform: scale(.97); }
+
+    .btn-primary  { background: var(--azul);  color: #fff; width: 100%; justify-content: center; }
+    .btn-success  { background: var(--verde); color: #fff; }
+    .btn-danger   { background: var(--rojo);  color: #fff; }
+    .btn-secondary{ background: var(--borde); color: var(--texto); }
+    .btn-sm       { padding: 6px 12px; font-size: 12px; }
+
+    .error-msg {
+      background: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: var(--rojo);
+      padding: 10px 14px;
+      border-radius: var(--radio);
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* ── App principal ─────────────────────────────────── */
+    #pantalla-app { display: none; }
+
+    /* Header */
+    .header {
+      background: #1a365d;
+      color: #fff;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h2 { font-size: 16px; font-weight: 700; }
+
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .badge-rol {
+      background: rgba(255,255,255,.2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .btn-logout {
+      background: rgba(255,255,255,.15);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* Contenido principal */
+    .main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--borde);
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--texto-2);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color .2s;
+    }
+
+    .tab.activo {
+      color: var(--azul);
+      border-bottom-color: var(--azul);
+    }
+
+    /* Cards resumen */
+    .resumen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .resumen-card {
+      background: var(--card);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .resumen-card .numero {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .resumen-card .etiqueta {
+      font-size: 12px;
+      color: var(--texto-2);
+      margin-top: 6px;
+    }
+
+    .num-total     { color: var(--azul); }
+    .num-progreso  { color: var(--amarillo); }
+    .num-completado{ color: var(--verde); }
+    .num-atrasado  { color: var(--rojo); }
+
+    /* Gráficas */
+    .graficas-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 700px) { .graficas-grid { grid-template-columns: 1fr; } }
+
+    .grafica-card {
+      background: var(--card);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      padding: 20px;
+    }
+
+    .grafica-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--texto-2);
+      margin-bottom: 16px;
+    }
+
+    /* Filtros */
+    .filtros {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: flex-end;
+    }
+
+    .filtros .campo { margin: 0; flex: 1; min-width: 140px; }
+
+    /* Tabla de objetivos */
+    .tabla-wrap {
+      background: var(--card);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      background: #f0f4f8;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--texto-2);
+      white-space: nowrap;
+    }
+
+    tbody tr { border-top: 1px solid var(--borde); }
+    tbody tr:hover { background: #f7fafc; }
+    tbody td { padding: 12px 16px; vertical-align: middle; }
+
+    /* Semáforo */
+    .semaforo {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .sem-verde   { background: var(--verde); }
+    .sem-amarillo{ background: var(--amarillo); }
+    .sem-rojo    { background: var(--rojo); }
+    .sem-gris    { background: var(--gris); }
+
+    /* Barra de progreso */
+    .barra-wrap {
+      background: var(--borde);
+      border-radius: 10px;
+      height: 8px;
+      width: 100px;
+      overflow: hidden;
+    }
+
+    .barra-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: var(--azul);
+      transition: width .4s;
+    }
+
+    /* Badge estado */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-pendiente  { background: #ebf8ff; color: #2b6cb0; }
+    .badge-progreso   { background: #fefcbf; color: #744210; }
+    .badge-completado { background: #f0fff4; color: #276749; }
+    .badge-atrasado   { background: #fff5f5; color: #c53030; }
+    .badge-cancelado  { background: #f7fafc; color: #718096; }
+    .badge-pausado    { background: #faf5ff; color: #553c9a; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.abierto { display: flex; }
+
+    .modal {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 28px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h3 { font-size: 17px; }
+
+    .btn-cerrar {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--texto-2);
+      line-height: 1;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    /* Sección de avances dentro del modal */
+    .avances-lista { margin-top: 16px; }
+
+    .avance-item {
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .avance-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .avance-pct {
+      color: var(--azul);
+      font-size: 15px;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--texto-2);
+      font-size: 14px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 24px; height: 24px;
+      border: 3px solid var(--borde);
+      border-top-color: var(--azul);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Vacío */
+    .vacio {
+      text-align: center;
+      padding: 48px;
+      color: var(--texto-2);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANTALLA DE LOGIN
+══════════════════════════════════════════════════════════ -->
+<div id="pantalla-login">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>Instituto de Capacitación Helvex</h1>
+      <p>Sistema de Seguimiento de Objetivos</p>
+    </div>
+
+    <div class="campo">
+      <label for="inp-noemp">Número de empleado</label>
+      <input type="text" id="inp-noemp" placeholder="Ej. 10001" />
+    </div>
+
+    <div class="campo">
+      <label for="inp-pass">Contraseña</label>
+      <input type="password" id="inp-pass" placeholder="••••••••" />
+    </div>
+
+    <button class="btn btn-primary" onclick="hacerLogin()">Iniciar sesión</button>
+    <div class="error-msg" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANTALLA PRINCIPAL
+══════════════════════════════════════════════════════════ -->
+<div id="pantalla-app">
+
+  <!-- Header -->
+  <div class="header">
+    <h2>ICH — Objetivos</h2>
+    <div class="header-user">
+      <span id="hdr-nombre">—</span>
+      <span class="badge-rol" id="hdr-rol">—</span>
+      <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+
+  <!-- Contenido -->
+  <div class="main">
+
+    <!-- Tabs (el tab de Dashboard solo aparece para Jefe) -->
+    <div class="tabs" id="tabs-container">
+      <button class="tab activo" data-tab="tab-dashboard" id="btn-tab-dashboard"
+              onclick="cambiarTab('tab-dashboard')">Dashboard</button>
+      <button class="tab" data-tab="tab-objetivos"
+              onclick="cambiarTab('tab-objetivos')">Objetivos</button>
+      <button class="tab" data-tab="tab-nuevo"
+              onclick="cambiarTab('tab-nuevo')">+ Nuevo objetivo</button>
+    </div>
+
+    <!-- ── Tab: Dashboard ──────────────────────────────── -->
+    <div id="tab-dashboard">
+
+      <!-- Cards resumen -->
+      <div class="resumen-grid">
+        <div class="resumen-card">
+          <div class="numero num-total"    id="res-total">—</div>
+          <div class="etiqueta">Total objetivos</div>
+        </div>
+        <div class="resumen-card">
+          <div class="numero num-progreso" id="res-progreso">—</div>
+          <div class="etiqueta">En progreso</div>
+        </div>
+        <div class="resumen-card">
+          <div class="numero num-completado" id="res-completado">—</div>
+          <div class="etiqueta">Completados</div>
+        </div>
+        <div class="resumen-card">
+          <div class="numero num-atrasado" id="res-atrasado">—</div>
+          <div class="etiqueta">Atrasados</div>
+        </div>
+      </div>
+
+      <!-- Gráficas (solo Jefe) -->
+      <div class="graficas-grid" id="seccion-graficas">
+        <div class="grafica-card">
+          <h3>Objetivos por estado</h3>
+          <canvas id="grafica-estados" height="200"></canvas>
+        </div>
+        <div class="grafica-card">
+          <h3>Avance por colaborador</h3>
+          <canvas id="grafica-colaboradores" height="200"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Tab: Objetivos ──────────────────────────────── -->
+    <div id="tab-objetivos" style="display:none">
+
+      <!-- Filtros -->
+      <div class="filtros">
+        <div class="campo">
+          <label>Estado</label>
+          <select id="fil-estado" onchange="aplicarFiltros()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="campo" id="fil-col-wrap">
+          <label>Colaborador</label>
+          <select id="fil-colaborador" onchange="aplicarFiltros()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Prioridad</label>
+          <select id="fil-prioridad" onchange="aplicarFiltros()">
+            <option value="">Todas</option>
+            <option>Alta</option>
+            <option>Media</option>
+            <option>Baja</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Año</label>
+          <select id="fil-anio" onchange="aplicarFiltros()">
+            <option value="">Todos</option>
+            <option>2025</option>
+            <option>2026</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th><!-- semáforo -->
+              <th>Objetivo</th>
+              <th>Asignado a</th>
+              <th>Prioridad</th>
+              <th>Avance</th>
+              <th>Estado</th>
+              <th>Fecha límite</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <tr><td colspan="8"><div class="loading">
+              <div class="spinner"></div><br>Cargando objetivos…
+            </div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Tab: Nuevo objetivo ─────────────────────────── -->
+    <div id="tab-nuevo" style="display:none">
+      <div style="background:var(--card);border:1px solid var(--borde);
+                  border-radius:var(--radio);padding:28px;max-width:560px">
+        <h3 style="margin-bottom:20px;font-size:16px">Registrar nuevo objetivo</h3>
+
+        <div class="campo">
+          <label>Título del objetivo *</label>
+          <input type="text" id="nv-titulo" placeholder="Ej. Aumentar cobertura de capacitación" />
+        </div>
+
+        <div class="campo">
+          <label>Descripción</label>
+          <textarea id="nv-desc" placeholder="Describe el objetivo, metas específicas, indicadores…"></textarea>
+        </div>
+
+        <div class="campo">
+          <label>Asignar a *</label>
+          <select id="nv-asignado">
+            <option value="">— Selecciona colaborador —</option>
+          </select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="campo">
+            <label>Fecha inicio</label>
+            <input type="date" id="nv-inicio" />
+          </div>
+          <div class="campo">
+            <label>Fecha límite *</label>
+            <input type="date" id="nv-limite" />
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="campo">
+            <label>Año</label>
+            <input type="number" id="nv-anio" value="2025" min="2020" max="2030" />
+          </div>
+          <div class="campo">
+            <label>Prioridad</label>
+            <select id="nv-prioridad">
+              <option>Alta</option>
+              <option selected>Media</option>
+              <option>Baja</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="btn btn-primary" onclick="guardarObjetivo()">Guardar objetivo</button>
+          <button class="btn btn-secondary" onclick="cambiarTab('tab-objetivos')">Cancelar</button>
+        </div>
+        <div class="error-msg" id="nv-error"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /pantalla-app -->
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: VER / EDITAR OBJETIVO + AVANCES
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-objetivo">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-titulo">Objetivo</h3>
+      <button class="btn-cerrar" onclick="cerrarModal()">×</button>
+    </div>
+
+    <!-- Detalle (modo lectura) -->
+    <div id="modal-detalle"></div>
+
+    <!-- Registrar avance -->
+    <div id="modal-avance-form" style="margin-top:20px;border-top:1px solid var(--borde);padding-top:20px">
+      <h4 style="font-size:14px;margin-bottom:12px">Registrar avance</h4>
+      <div class="campo">
+        <label>Porcentaje de avance: <strong id="pct-label">0%</strong></label>
+        <input type="range" id="inp-pct" min="0" max="100" value="0"
+               oninput="document.getElementById('pct-label').textContent=this.value+'%'" />
+      </div>
+      <div class="campo">
+        <label>Comentario</label>
+        <textarea id="inp-comentario" placeholder="Describe el avance realizado…"></textarea>
+      </div>
+      <div class="campo">
+        <label>Evidencia (link de Drive u otro)</label>
+        <input type="url" id="inp-evidencia" placeholder="https://drive.google.com/…" />
+      </div>
+      <button class="btn btn-success btn-sm" onclick="guardarAvance()">Guardar avance</button>
+    </div>
+
+    <!-- Historial de avances -->
+    <div style="margin-top:20px;border-top:1px solid var(--borde);padding-top:20px">
+      <h4 style="font-size:14px;margin-bottom:12px">Historial de avances</h4>
+      <div id="avances-lista" class="avances-lista">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Acciones Jefe -->
+    <div class="modal-footer" id="modal-footer-jefe"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: EDITAR OBJETIVO
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-editar">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Editar objetivo</h3>
+      <button class="btn-cerrar" onclick="cerrarModalEditar()">×</button>
+    </div>
+
+    <div class="campo"><label>Título *</label>
+      <input type="text" id="ed-titulo" /></div>
+    <div class="campo"><label>Descripción</label>
+      <textarea id="ed-desc"></textarea></div>
+    <div class="campo"><label>Asignado a</label>
+      <select id="ed-asignado"></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="campo"><label>Fecha inicio</label>
+        <input type="date" id="ed-inicio" /></div>
+      <div class="campo"><label>Fecha límite</label>
+        <input type="date" id="ed-limite" /></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="campo"><label>Estado</label>
+        <select id="ed-estado"></select></div>
+      <div class="campo"><label>Prioridad</label>
+        <select id="ed-prioridad">
+          <option>Alta</option><option>Media</option><option>Baja</option>
+        </select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+      <button class="btn btn-primary"   onclick="guardarEdicion()">Guardar cambios</button>
+    </div>
+    <div class="error-msg" id="ed-error"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CONFIGURACIÓN — pon aquí tu URL de Apps Script
+// ════════════════════════════════════════════════════════════
+const API_URL = "https://script.google.com/macros/s/AKfycbwem1u7fYg1BhTdOy44VrhhGDqgte4QikxECYbBS6DF1qlsaTgdeCIM8Loj-MEG0HZ6/exec";
+
+// ════════════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════════════════════════════
+let usuario      = null;   // objeto con id, nombre, rol, etc.
+let objetivos    = [];     // todos los objetivos cargados
+let usuarios     = [];     // lista de colaboradores
+let catalogo     = {};     // { estados: [], prioridades: [] }
+let objetivoActual = null; // objetivo abierto en el modal
+let graficaEstados = null;
+let graficaColabs  = null;
+
+// ════════════════════════════════════════════════════════════
+// UTILIDADES
+// ════════════════════════════════════════════════════════════
+async function api(body) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body:   JSON.stringify(body)
+  });
+  return res.json();
+}
+
+function mostrarError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 5000);
+}
+
+function formatFecha(f) {
+  if (!f) return "—";
+  const d = new Date(f);
+  if (isNaN(d)) return f;
+  return d.toLocaleDateString("es-MX", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+function badgeEstado(estado) {
+  const map = {
+    "Pendiente":   "badge-pendiente",
+    "En progreso": "badge-progreso",
+    "Completado":  "badge-completado",
+    "Atrasado":    "badge-atrasado",
+    "Cancelado":   "badge-cancelado",
+    "Pausado":     "badge-pausado"
+  };
+  return `<span class="badge ${map[estado]||''}">${estado}</span>`;
+}
+
+// ════════════════════════════════════════════════════════════
+// LOGIN
+// ════════════════════════════════════════════════════════════
+async function hacerLogin() {
+  const noEmp = document.getElementById("inp-noemp").value.trim();
+  const pass  = document.getElementById("inp-pass").value.trim();
+
+  if (!noEmp || !pass) {
+    mostrarError("login-error", "Ingresa número de empleado y contraseña");
+    return;
+  }
+
+  const btn = document.querySelector("#pantalla-login .btn-primary");
+  btn.textContent = "Verificando…";
+  btn.disabled = true;
+
+  try {
+    const r = await api({ action: "login", noEmpleado: noEmp, contrasena: pass });
+
+    if (!r.ok) {
+      mostrarError("login-error", r.error);
+      btn.textContent = "Iniciar sesión";
+      btn.disabled = false;
+      return;
+    }
+
+    usuario = r.usuario;
+    iniciarApp();
+  } catch {
+    mostrarError("login-error", "Error de conexión. Intenta de nuevo.");
+    btn.textContent = "Iniciar sesión";
+    btn.disabled = false;
+  }
+}
+
+// Permitir Enter en el login
+document.getElementById("inp-pass").addEventListener("keydown", e => {
+  if (e.key === "Enter") hacerLogin();
+});
+
+// ════════════════════════════════════════════════════════════
+// INICIO DE LA APP
+// ════════════════════════════════════════════════════════════
+async function iniciarApp() {
+  // Mostrar pantalla principal
+  document.getElementById("pantalla-login").style.display = "none";
+  document.getElementById("pantalla-app").style.display   = "block";
+
+  // Header
+  document.getElementById("hdr-nombre").textContent = usuario.nombre;
+  document.getElementById("hdr-rol").textContent    = usuario.rol;
+
+  // Ocultar tab Dashboard y gráficas para colaborador
+  if (usuario.rol !== "Jefe") {
+    document.getElementById("btn-tab-dashboard").style.display = "none";
+    document.getElementById("seccion-graficas").style.display  = "none";
+    document.getElementById("fil-col-wrap").style.display      = "none";
+    cambiarTab("tab-objetivos");
+  }
+
+  // Cargar catálogo y usuarios en paralelo
+  await Promise.all([cargarCatalogo(), cargarUsuarios()]);
+
+  // Cargar objetivos
+  await cargarObjetivos();
+
+  // Llenar selects de filtros con estados del catálogo
+  const filEstado = document.getElementById("fil-estado");
+  catalogo.estados.forEach(e => {
+    const o = document.createElement("option");
+    o.value = o.textContent = e;
+    filEstado.appendChild(o);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// CATÁLOGO
+// ════════════════════════════════════════════════════════════
+async function cargarCatalogo() {
+  const r = await api({ action: "getCatalogo" });
+  if (r.ok) catalogo = { estados: r.estados, prioridades: r.prioridades };
+}
+
+// ════════════════════════════════════════════════════════════
+// USUARIOS
+// ════════════════════════════════════════════════════════════
+async function cargarUsuarios() {
+  if (usuario.rol !== "Jefe") return;
+  const r = await api({ action: "getUsuarios", rol: usuario.rol });
+  if (!r.ok) return;
+
+  usuarios = r.data;
+
+  // Llenar select de filtro por colaborador
+  const filCol = document.getElementById("fil-colaborador");
+  usuarios.forEach(u => {
+    const o = document.createElement("option");
+    o.value = u.id;
+    o.textContent = u.nombre;
+    filCol.appendChild(o);
+  });
+
+  // Llenar selects de "asignar a" en el formulario de nuevo objetivo
+  llenarSelectUsuarios("nv-asignado");
+}
+
+function llenarSelectUsuarios(selectId) {
+  const sel = document.getElementById(selectId);
+  // Limpiar opciones anteriores (salvo la primera)
+  while (sel.options.length > 1) sel.remove(1);
+
+  usuarios.forEach(u => {
+    const o = document.createElement("option");
+    o.value = u.id;
+    o.textContent = `${u.nombre} (${u.rol})`;
+    sel.appendChild(o);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// OBJETIVOS
+// ════════════════════════════════════════════════════════════
+async function cargarObjetivos() {
+  const r = await api({
+    action: "getObjetivos",
+    userId: usuario.id,
+    rol:    usuario.rol
+  });
+
+  if (!r.ok) {
+    document.getElementById("tabla-body").innerHTML =
+      `<tr><td colspan="8"><div class="vacio">Error al cargar objetivos</div></td></tr>`;
+    return;
+  }
+
+  objetivos = r.data;
+  actualizarResumen();
+  renderTabla(objetivos);
+  if (usuario.rol === "Jefe") renderGraficas();
+}
+
+function actualizarResumen() {
+  const total      = objetivos.length;
+  const progreso   = objetivos.filter(o => o.estado === "En progreso").length;
+  const completado = objetivos.filter(o => o.estado === "Completado").length;
+  const atrasado   = objetivos.filter(o =>
+    o.semaforo === "rojo" && o.estado !== "Completado").length;
+
+  document.getElementById("res-total").textContent      = total;
+  document.getElementById("res-progreso").textContent   = progreso;
+  document.getElementById("res-completado").textContent = completado;
+  document.getElementById("res-atrasado").textContent   = atrasado;
+}
+
+function renderTabla(lista) {
+  const tbody = document.getElementById("tabla-body");
+
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="vacio">No hay objetivos que mostrar</div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(o => `
+    <tr>
+      <td><span class="semaforo sem-${o.semaforo}"></span></td>
+      <td style="max-width:200px">
+        <strong style="font-size:13px">${o.titulo}</strong>
+      </td>
+      <td>${o.nombreAsignado}</td>
+      <td>${o.prioridad}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="barra-wrap">
+            <div class="barra-fill" style="width:${o.porcentaje}%"></div>
+          </div>
+          <span style="font-size:12px;color:var(--texto-2)">${o.porcentaje}%</span>
+        </div>
+      </td>
+      <td>${badgeEstado(o.estado)}</td>
+      <td style="font-size:12px;color:var(--texto-2)">${formatFecha(o.fechaLimite)}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm"
+                onclick="abrirModalObjetivo('${o.id}')">Ver</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// ── Filtros ─────────────────────────────────────────────────
+function aplicarFiltros() {
+  const estado    = document.getElementById("fil-estado").value;
+  const colabId   = document.getElementById("fil-colaborador")?.value || "";
+  const prioridad = document.getElementById("fil-prioridad").value;
+  const anio      = document.getElementById("fil-anio").value;
+
+  const filtrados = objetivos.filter(o => {
+    if (estado    && o.estado    !== estado)    return false;
+    if (colabId   && o.idAsignado !== colabId)  return false;
+    if (prioridad && o.prioridad !== prioridad) return false;
+    if (anio      && String(o.anio) !== anio)   return false;
+    return true;
+  });
+
+  renderTabla(filtrados);
+}
+
+// ════════════════════════════════════════════════════════════
+// GRÁFICAS (solo Jefe)
+// ════════════════════════════════════════════════════════════
+function renderGraficas() {
+  // Gráfica 1: Objetivos por estado (dona)
+  const conteoEstados = {};
+  objetivos.forEach(o => {
+    conteoEstados[o.estado] = (conteoEstados[o.estado] || 0) + 1;
+  });
+
+  const coloresEstado = {
+    "Pendiente":   "#3182ce",
+    "En progreso": "#d69e2e",
+    "Completado":  "#38a169",
+    "Atrasado":    "#e53e3e",
+    "Cancelado":   "#718096",
+    "Pausado":     "#805ad5"
+  };
+
+  const ctx1 = document.getElementById("grafica-estados").getContext("2d");
+  if (graficaEstados) graficaEstados.destroy();
+  graficaEstados = new Chart(ctx1, {
+    type: "doughnut",
+    data: {
+      labels:   Object.keys(conteoEstados),
+      datasets: [{
+        data:            Object.values(conteoEstados),
+        backgroundColor: Object.keys(conteoEstados).map(e => coloresEstado[e] || "#ccc"),
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "bottom", labels: { font: { size: 12 } } } }
+    }
+  });
+
+  // Gráfica 2: Avance promedio por colaborador (barras)
+  const porColab = {};
+  objetivos.forEach(o => {
+    const nombre = o.nombreAsignado;
+    if (!porColab[nombre]) porColab[nombre] = { suma: 0, total: 0 };
+    porColab[nombre].suma  += o.porcentaje;
+    porColab[nombre].total += 1;
+  });
+
+  const nombresColab = Object.keys(porColab);
+  const promedios    = nombresColab.map(n =>
+    Math.round(porColab[n].suma / porColab[n].total)
+  );
+
+  const ctx2 = document.getElementById("grafica-colaboradores").getContext("2d");
+  if (graficaColabs) graficaColabs.destroy();
+  graficaColabs = new Chart(ctx2, {
+    type: "bar",
+    data: {
+      labels:   nombresColab,
+      datasets: [{
+        label:           "% promedio",
+        data:            promedios,
+        backgroundColor: "#3182ce",
+        borderRadius:    4
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, max: 100,
+             ticks: { callback: v => v + "%" } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// MODAL: VER OBJETIVO + AVANCES
+// ════════════════════════════════════════════════════════════
+async function abrirModalObjetivo(idObjetivo) {
+  objetivoActual = objetivos.find(o => o.id === idObjetivo);
+  if (!objetivoActual) return;
+
+  document.getElementById("modal-titulo").textContent = objetivoActual.titulo;
+
+  // Detalle del objetivo
+  document.getElementById("modal-detalle").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:12px">
+      <div><span style="color:var(--texto-2)">Asignado a:</span><br>
+           <strong>${objetivoActual.nombreAsignado}</strong></div>
+      <div><span style="color:var(--texto-2)">Estado:</span><br>
+           ${badgeEstado(objetivoActual.estado)}</div>
+      <div><span style="color:var(--texto-2)">Prioridad:</span><br>
+           <strong>${objetivoActual.prioridad}</strong></div>
+      <div><span style="color:var(--texto-2)">Fecha límite:</span><br>
+           <strong>${formatFecha(objetivoActual.fechaLimite)}</strong></div>
+      <div><span style="color:var(--texto-2)">Avance actual:</span><br>
+           <strong style="color:var(--azul)">${objetivoActual.porcentaje}%</strong></div>
+      <div><span style="color:var(--texto-2)">Días restantes:</span><br>
+           <strong>${objetivoActual.diasRestantes > 0
+             ? objetivoActual.diasRestantes + " días"
+             : "<span style='color:var(--rojo)'>Vencido</span>"}</strong></div>
+    </div>
+    ${objetivoActual.descripcion
+      ? `<p style="font-size:13px;color:var(--texto-2);
+                   border-left:3px solid var(--borde);
+                   padding-left:12px;margin-bottom:8px">
+           ${objetivoActual.descripcion}</p>` : ""}
+  `;
+
+  // Poner el slider en el avance actual
+  const inpPct = document.getElementById("inp-pct");
+  inpPct.value = objetivoActual.porcentaje;
+  document.getElementById("pct-label").textContent = objetivoActual.porcentaje + "%";
+
+  // Limpiar campos de avance
+  document.getElementById("inp-comentario").value = "";
+  document.getElementById("inp-evidencia").value  = "";
+
+  // Botones del Jefe (editar / eliminar)
+  const footer = document.getElementById("modal-footer-jefe");
+  if (usuario.rol === "Jefe") {
+    footer.innerHTML = `
+      <button class="btn btn-secondary btn-sm"
+              onclick="abrirModalEditar('${idObjetivo}')">Editar objetivo</button>
+      <button class="btn btn-danger btn-sm"
+              onclick="eliminarObjetivo('${idObjetivo}')">Eliminar</button>
+    `;
+  } else {
+    footer.innerHTML = "";
+  }
+
+  // Mostrar modal
+  document.getElementById("modal-objetivo").classList.add("abierto");
+
+  // Cargar historial de avances
+  cargarAvances(idObjetivo);
+}
+
+function cerrarModal() {
+  document.getElementById("modal-objetivo").classList.remove("abierto");
+  objetivoActual = null;
+}
+
+async function cargarAvances(idObjetivo) {
+  const lista = document.getElementById("avances-lista");
+  lista.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+
+  const r = await api({ action: "getAvances", idObjetivo });
+
+  if (!r.ok || !r.data.length) {
+    lista.innerHTML = `<p style="font-size:13px;color:var(--texto-2)">
+      Sin avances registrados aún.</p>`;
+    return;
+  }
+
+  lista.innerHTML = r.data.map(a => `
+    <div class="avance-item">
+      <div class="avance-header">
+        <span>${a.nombreUsuario}</span>
+        <span class="avance-pct">${a.porcentaje}%</span>
+      </div>
+      <div style="color:var(--texto-2);margin-bottom:4px">${a.comentario || "Sin comentario"}</div>
+      ${a.evidenciaLink
+        ? `<a href="${a.evidenciaLink}" target="_blank"
+              style="font-size:12px;color:var(--azul)">Ver evidencia →</a>` : ""}
+      <div style="font-size:11px;color:var(--texto-2);margin-top:6px">${a.fechaRegistro}</div>
+    </div>
+  `).join("");
+}
+
+// ════════════════════════════════════════════════════════════
+// GUARDAR AVANCE
+// ════════════════════════════════════════════════════════════
+async function guardarAvance() {
+  if (!objetivoActual) return;
+
+  const pct      = document.getElementById("inp-pct").value;
+  const comentario  = document.getElementById("inp-comentario").value.trim();
+  const evidencia   = document.getElementById("inp-evidencia").value.trim();
+
+  const btn = document.querySelector("#modal-avance-form .btn-success");
+  btn.textContent = "Guardando…";
+  btn.disabled = true;
+
+  const r = await api({
+    action:        "createAvance",
+    idObjetivo:    objetivoActual.id,
+    userId:        usuario.id,
+    porcentaje:    pct,
+    comentario,
+    evidenciaLink: evidencia
+  });
+
+  btn.textContent = "Guardar avance";
+  btn.disabled = false;
+
+  if (!r.ok) { alert("Error: " + r.error); return; }
+
+  // Recargar todo
+  cargarAvances(objetivoActual.id);
+  await cargarObjetivos();
+  cerrarModal();
+}
+
+// ════════════════════════════════════════════════════════════
+// CREAR NUEVO OBJETIVO
+// ════════════════════════════════════════════════════════════
+async function guardarObjetivo() {
+  const titulo    = document.getElementById("nv-titulo").value.trim();
+  const desc      = document.getElementById("nv-desc").value.trim();
+  const asignado  = document.getElementById("nv-asignado").value;
+  const inicio    = document.getElementById("nv-inicio").value;
+  const limite    = document.getElementById("nv-limite").value;
+  const anio      = document.getElementById("nv-anio").value;
+  const prioridad = document.getElementById("nv-prioridad").value;
+
+  if (!titulo)   { mostrarError("nv-error", "El título es obligatorio"); return; }
+  if (!asignado) { mostrarError("nv-error", "Debes asignar el objetivo a alguien"); return; }
+  if (!limite)   { mostrarError("nv-error", "La fecha límite es obligatoria"); return; }
+
+  const btn = document.querySelector("#tab-nuevo .btn-primary");
+  btn.textContent = "Guardando…";
+  btn.disabled = true;
+
+  const r = await api({
+    action:      "createObjetivo",
+    userId:      usuario.id,
+    titulo,
+    descripcion: desc,
+    idAsignado:  asignado,
+    fechaInicio: inicio,
+    fechaLimite: limite,
+    anio,
+    prioridad
+  });
+
+  btn.textContent = "Guardar objetivo";
+  btn.disabled = false;
+
+  if (!r.ok) { mostrarError("nv-error", r.error); return; }
+
+  // Limpiar form y regresar a la tabla
+  document.getElementById("nv-titulo").value = "";
+  document.getElementById("nv-desc").value   = "";
+  document.getElementById("nv-asignado").value = "";
+  document.getElementById("nv-limite").value = "";
+
+  await cargarObjetivos();
+  cambiarTab("tab-objetivos");
+}
+
+// ════════════════════════════════════════════════════════════
+// MODAL: EDITAR OBJETIVO (solo Jefe)
+// ════════════════════════════════════════════════════════════
+function abrirModalEditar(idObjetivo) {
+  const o = objetivos.find(x => x.id === idObjetivo);
+  if (!o) return;
+  objetivoActual = o;
+
+  cerrarModal();
+
+  document.getElementById("ed-titulo").value    = o.titulo;
+  document.getElementById("ed-desc").value      = o.descripcion || "";
+  document.getElementById("ed-inicio").value    = o.fechaInicio || "";
+  document.getElementById("ed-limite").value    = o.fechaLimite || "";
+
+  // Llenar select de asignado
+  llenarSelectUsuarios("ed-asignado");
+  document.getElementById("ed-asignado").value = o.idAsignado;
+
+  // Llenar select de estados
+  const selEstado = document.getElementById("ed-estado");
+  selEstado.innerHTML = "";
+  catalogo.estados.forEach(e => {
+    const opt = document.createElement("option");
+    opt.value = opt.textContent = e;
+    if (e === o.estado) opt.selected = true;
+    selEstado.appendChild(opt);
+  });
+
+  document.getElementById("ed-prioridad").value = o.prioridad;
+  document.getElementById("ed-error").style.display = "none";
+
+  document.getElementById("modal-editar").classList.add("abierto");
+}
+
+function cerrarModalEditar() {
+  document.getElementById("modal-editar").classList.remove("abierto");
+}
+
+async function guardarEdicion() {
+  if (!objetivoActual) return;
+
+  const campos = {
+    titulo:      document.getElementById("ed-titulo").value.trim(),
+    descripcion: document.getElementById("ed-desc").value.trim(),
+    idAsignado:  document.getElementById("ed-asignado").value,
+    fechaInicio: document.getElementById("ed-inicio").value,
+    fechaLimite: document.getElementById("ed-limite").value,
+    estado:      document.getElementById("ed-estado").value,
+    prioridad:   document.getElementById("ed-prioridad").value
+  };
+
+  if (!campos.titulo)   { mostrarError("ed-error", "El título es obligatorio"); return; }
+  if (!campos.fechaLimite) { mostrarError("ed-error", "La fecha límite es obligatoria"); return; }
+
+  const btn = document.querySelector("#modal-editar .btn-primary");
+  btn.textContent = "Guardando…";
+  btn.disabled = true;
+
+  const r = await api({
+    action:      "updateObjetivo",
+    idObjetivo:  objetivoActual.id,
+    campos
+  });
+
+  btn.textContent = "Guardar cambios";
+  btn.disabled = false;
+
+  if (!r.ok) { mostrarError("ed-error", r.error); return; }
+
+  cerrarModalEditar();
+  await cargarObjetivos();
+}
+
+// ════════════════════════════════════════════════════════════
+// ELIMINAR OBJETIVO (solo Jefe)
+// ════════════════════════════════════════════════════════════
+async function eliminarObjetivo(idObjetivo) {
+  if (!confirm("¿Seguro que deseas eliminar este objetivo? Esta acción no se puede deshacer."))
+    return;
+
+  const r = await api({
+    action:      "deleteObjetivo",
+    idObjetivo,
+    rol:         usuario.rol
+  });
+
+  if (!r.ok) { alert("Error: " + r.error); return; }
+
+  cerrarModal();
+  await cargarObjetivos();
+}
+
+// ════════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════════════════════════════════
+function cambiarTab(tabId) {
+  ["tab-dashboard", "tab-objetivos", "tab-nuevo"].forEach(id => {
+    document.getElementById(id).style.display = id === tabId ? "block" : "none";
+  });
+
+  document.querySelectorAll(".tab").forEach(btn => {
+    btn.classList.toggle("activo", btn.dataset.tab === tabId);
+  });
+}
+
+function cerrarSesion() {
+  usuario = null;
+  objetivos = [];
+  document.getElementById("pantalla-app").style.display  = "none";
+  document.getElementById("pantalla-login").style.display = "flex";
+  document.getElementById("inp-noemp").value = "";
+  document.getElementById("inp-pass").value  = "";
+}
+
+// Cerrar modales con Escape
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { cerrarModal(); cerrarModalEditar(); }
+});
+</script>
+</body>
+</html>
