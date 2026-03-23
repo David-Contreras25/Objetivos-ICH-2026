@@ -497,6 +497,37 @@
       </div>
     </div>
 
+<!-- Registrar avance -->
+<div id="modal-avance-form"
+     style="margin-top:20px;border-top:1px solid var(--borde);padding-top:20px">
+  <h4 style="font-size:14px;margin-bottom:12px">Registrar avance</h4>
+  <div class="campo">
+    <label>Porcentaje de avance:
+      <strong id="pct-label">0%</strong>
+    </label>
+    <input type="range" id="inp-pct" min="0" max="100" value="0"
+           oninput="document.getElementById('pct-label').textContent=this.value+'%'"/>
+  </div>
+  <div class="campo">
+    <label>Comentario</label>
+    <textarea id="inp-comentario"
+              placeholder="Describe el avance realizado…"></textarea>
+  </div>
+  <div class="campo">
+    <label>Evidencia (link de Drive u otro)</label>
+    <input type="url" id="inp-evidencia"
+           placeholder="https://drive.google.com/…"/>
+  </div>
+  <button class="btn btn-success btn-sm"
+          onclick="guardarAvance()">Guardar avance</button>
+</div>
+
+<!-- Historial de avances -->
+<div style="margin-top:20px;border-top:1px solid var(--borde);padding-top:16px">
+  <h4 style="font-size:14px;margin-bottom:12px">Historial de avances</h4>
+  <div id="avances-lista"></div>
+</div>
+    
     <!-- Historial de avances -->
     <div style="margin-top:20px;border-top:1px solid var(--borde);padding-top:16px">
       <h4 style="font-size:14px;margin-bottom:12px">Historial de avances</h4>
@@ -575,25 +606,26 @@
 // ════════════════════════════════════════════════════════════
 // CONFIGURACIÓN
 // ════════════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbzQGfIMpcPstRdt0OCq-ZEfJylpG1o_cFNePX3tH8R66nbm8qrx7yfKZrpuaawB8pLf/exec";
+const API_URL = "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT";
 
 // ════════════════════════════════════════════════════════════
 // ESTADO GLOBAL
 // ════════════════════════════════════════════════════════════
-let usuario        = null;
-let objetivos      = [];
-let usuarios       = [];
-let catalogo       = {};
-let objetivoActual = null;
+let usuario         = null;
+let objetivos       = [];
+let usuarios        = [];
+let catalogo        = {};
+let objetivoActual  = null;
 let tareaAConfirmar = null;
-let graficaEstados = null;
-let graficaColabs  = null;
+let graficaEstados  = null;
+let graficaColabs   = null;
+let graficaPersonal = null;
 
 // ════════════════════════════════════════════════════════════
 // UTILIDADES
 // ════════════════════════════════════════════════════════════
 async function api(body) {
-  const res = await fetch(API_URL, { method:"POST", body: JSON.stringify(body) });
+  const res = await fetch(API_URL, { method:"POST", body:JSON.stringify(body) });
   return res.json();
 }
 
@@ -613,25 +645,27 @@ function formatFecha(f) {
 
 function badgeEstado(estado) {
   const map = {
-    "Pendiente":"badge-pendiente","En progreso":"badge-progreso",
-    "Completado":"badge-completado","Atrasado":"badge-atrasado",
-    "Cancelado":"badge-cancelado","Pausado":"badge-pausado"
+    "Pendiente":   "badge-pendiente",
+    "En progreso": "badge-progreso",
+    "Completado":  "badge-completado",
+    "Atrasado":    "badge-atrasado",
+    "Cancelado":   "badge-cancelado",
+    "Pausado":     "badge-pausado"
   };
-  return `<span class="badge ${map[estado]||''}">${estado}</span>`;
+  return `<span class="badge ${map[estado]||""}">${estado}</span>`;
 }
 
 // ════════════════════════════════════════════════════════════
 // SESIÓN
 // ════════════════════════════════════════════════════════════
-function guardarSesion(u)  { localStorage.setItem("ich_usuario", JSON.stringify(u)); }
-function borrarSesion()    { localStorage.removeItem("ich_usuario"); }
+function guardarSesion(u) { localStorage.setItem("ich_usuario", JSON.stringify(u)); }
+function borrarSesion()   { localStorage.removeItem("ich_usuario"); }
 function leerSesion() {
   try { const r = localStorage.getItem("ich_usuario");
         return r ? JSON.parse(r) : null; }
   catch { return null; }
 }
 
-// Al cargar la página restaurar sesión si existe
 window.addEventListener("DOMContentLoaded", () => {
   const s = leerSesion();
   if (s) { usuario = s; iniciarApp(); }
@@ -681,25 +715,23 @@ async function iniciarApp() {
 
   const esJefe = usuario.rol === "Jefe";
 
-  // Fix bug 1: mostrar dashboard solo a Jefe, ocultar para colaborador
-  document.getElementById("btn-tab-dashboard").style.display =
+  // Dashboard visible para ambos roles, gráficas de equipo solo para Jefe
+  document.getElementById("btn-tab-dashboard").style.display = "block";
+  document.getElementById("seccion-graficas-jefe").style.display =
+    esJefe ? "grid" : "none";
+  document.getElementById("seccion-graficas-colab").style.display =
+    esJefe ? "none" : "block";
+  document.getElementById("fil-col-wrap").style.display =
     esJefe ? "block" : "none";
-  document.getElementById("seccion-graficas").style.display  =
-    esJefe ? "grid"  : "none";
-  document.getElementById("fil-col-wrap").style.display      =
+  document.getElementById("nv-asignado-wrap").style.display =
     esJefe ? "block" : "none";
 
-  // Fix bug 2: campo "asignar a" solo para Jefe
-  document.getElementById("nv-asignado-wrap").style.display  =
-    esJefe ? "block" : "none";
-
-  // Tab inicial por rol
-  cambiarTab(esJefe ? "tab-dashboard" : "tab-objetivos");
+  cambiarTab("tab-dashboard");
 
   await Promise.all([cargarCatalogo(), cargarUsuarios()]);
   await cargarObjetivos();
 
-  // Poblar filtro de estados (evitar duplicados)
+  // Poblar filtro de estados
   const filEstado = document.getElementById("fil-estado");
   if (filEstado.options.length === 1) {
     catalogo.estados.forEach(e => {
@@ -752,18 +784,28 @@ function llenarSelectUsuarios(selectId) {
 // OBJETIVOS
 // ════════════════════════════════════════════════════════════
 async function cargarObjetivos() {
-  const r = await api({ action:"getObjetivos", userId:usuario.id, rol:usuario.rol });
+  const r = await api({
+    action:"getObjetivos", userId:usuario.id, rol:usuario.rol
+  });
   if (!r.ok) {
     document.getElementById("tabla-body").innerHTML =
-      `<tr><td colspan="9"><div class="vacio">Error al cargar objetivos</div></td></tr>`;
+      `<tr><td colspan="9">
+         <div class="vacio">Error al cargar objetivos</div>
+       </td></tr>`;
     return;
   }
   objetivos = r.data;
   actualizarResumen();
   renderTabla(objetivos);
-  if (usuario.rol === "Jefe") renderGraficas();
+
+  if (usuario.rol === "Jefe") {
+    renderGraficasJefe();
+  } else {
+    renderDashboardColab();
+  }
 }
 
+// ── Resumen (tarjetas) ──────────────────────────────────────
 function actualizarResumen() {
   document.getElementById("res-total").textContent =
     objetivos.length;
@@ -772,14 +814,17 @@ function actualizarResumen() {
   document.getElementById("res-completado").textContent =
     objetivos.filter(o => o.estado === "Completado").length;
   document.getElementById("res-atrasado").textContent =
-    objetivos.filter(o => o.semaforo === "rojo" && o.estado !== "Completado").length;
+    objetivos.filter(o =>
+      o.semaforo === "rojo" && o.estado !== "Completado").length;
 }
 
+// ── Tabla ───────────────────────────────────────────────────
 function renderTabla(lista) {
   const tbody = document.getElementById("tabla-body");
   if (!lista.length) {
     tbody.innerHTML = `<tr><td colspan="9">
-      <div class="vacio">No hay objetivos que mostrar</div></td></tr>`;
+      <div class="vacio">No hay objetivos que mostrar</div>
+    </td></tr>`;
     return;
   }
   tbody.innerHTML = lista.map(o => `
@@ -801,7 +846,8 @@ function renderTabla(lista) {
         ${o.tareasCompletadas}/${o.tareasTotal}
       </td>
       <td>${badgeEstado(o.estado)}</td>
-      <td style="font-size:12px;color:var(--texto-2)">${formatFecha(o.fechaLimite)}</td>
+      <td style="font-size:12px;color:var(--texto-2)">
+        ${formatFecha(o.fechaLimite)}</td>
       <td>
         <button class="btn btn-secondary btn-sm"
                 onclick="abrirModalObjetivo('${o.id}')">Ver</button>
@@ -824,9 +870,10 @@ function aplicarFiltros() {
 }
 
 // ════════════════════════════════════════════════════════════
-// GRÁFICAS
+// DASHBOARD JEFE — gráficas de equipo
 // ════════════════════════════════════════════════════════════
-function renderGraficas() {
+function renderGraficasJefe() {
+  // Dona: objetivos por estado
   const conteo = {};
   objetivos.forEach(o => { conteo[o.estado] = (conteo[o.estado]||0)+1; });
   const colores = {
@@ -839,14 +886,17 @@ function renderGraficas() {
     type:"doughnut",
     data:{
       labels: Object.keys(conteo),
-      datasets:[{ data:Object.values(conteo),
-        backgroundColor:Object.keys(conteo).map(e=>colores[e]||"#ccc"),
-        borderWidth:2 }]
+      datasets:[{
+        data: Object.values(conteo),
+        backgroundColor: Object.keys(conteo).map(e => colores[e]||"#ccc"),
+        borderWidth: 2
+      }]
     },
     options:{ responsive:true,
       plugins:{ legend:{ position:"bottom", labels:{ font:{size:12} } } } }
   });
 
+  // Barras: avance promedio por colaborador
   const porColab = {};
   objetivos.forEach(o => {
     const n = o.nombreAsignado;
@@ -855,15 +905,19 @@ function renderGraficas() {
     porColab[n].total += 1;
   });
   const nombres   = Object.keys(porColab);
-  const promedios = nombres.map(n => Math.round(porColab[n].suma/porColab[n].total));
+  const promedios = nombres.map(n =>
+    Math.round(porColab[n].suma / porColab[n].total));
+
   const ctx2 = document.getElementById("grafica-colaboradores").getContext("2d");
   if (graficaColabs) graficaColabs.destroy();
   graficaColabs = new Chart(ctx2, {
     type:"bar",
     data:{
       labels: nombres,
-      datasets:[{ label:"% promedio", data:promedios,
-                  backgroundColor:"#3182ce", borderRadius:4 }]
+      datasets:[{
+        label:"% promedio", data:promedios,
+        backgroundColor:"#3182ce", borderRadius:4
+      }]
     },
     options:{ responsive:true,
       scales:{ y:{ beginAtZero:true, max:100,
@@ -873,33 +927,62 @@ function renderGraficas() {
 }
 
 // ════════════════════════════════════════════════════════════
-// TAREAS EN FORMULARIO NUEVO OBJETIVO
+// DASHBOARD COLABORADOR — resumen personal + gráfica propia
 // ════════════════════════════════════════════════════════════
-let contadorTareas = 0;
+function renderDashboardColab() {
+  // Calcular avance promedio personal
+  const total     = objetivos.length;
+  const promedio  = total > 0
+    ? Math.round(objetivos.reduce((s,o) => s + o.porcentaje, 0) / total)
+    : 0;
+  const proxVencer = objetivos.filter(o =>
+    o.diasRestantes >= 0 && o.diasRestantes <= 7 &&
+    o.estado !== "Completado").length;
 
-function agregarTareaForm() {
-  contadorTareas++;
-  const id   = `tarea-inp-${contadorTareas}`;
-  const lista = document.getElementById("tareas-form-lista");
-  const div   = document.createElement("div");
-  div.className = "tarea-form-item";
-  div.id = `tarea-form-wrap-${contadorTareas}`;
-  div.innerHTML = `
-    <input type="text" id="${id}" placeholder="Descripción de la tarea ${contadorTareas}"/>
-    <button type="button" class="btn-quitar-tarea"
-            onclick="quitarTareaForm(${contadorTareas})">×</button>`;
-  lista.appendChild(div);
-  document.getElementById(id).focus();
-}
+  document.getElementById("colab-promedio").textContent  = promedio + "%";
+  document.getElementById("colab-prox").textContent      = proxVencer;
 
-function quitarTareaForm(n) {
-  document.getElementById(`tarea-form-wrap-${n}`)?.remove();
-}
+  // Gráfica de barras horizontal: un objetivo por barra
+  const ctx = document.getElementById("grafica-personal").getContext("2d");
+  if (graficaPersonal) graficaPersonal.destroy();
 
-function obtenerTareasForm() {
-  return Array.from(
-    document.getElementById("tareas-form-lista").querySelectorAll("input")
-  ).map(i => i.value.trim()).filter(Boolean);
+  const coloresBarra = objetivos.map(o => {
+    if (o.semaforo === "rojo")     return "#e53e3e";
+    if (o.semaforo === "amarillo") return "#d69e2e";
+    if (o.semaforo === "gris")     return "#718096";
+    return "#38a169";
+  });
+
+  graficaPersonal = new Chart(ctx, {
+    type:"bar",
+    data:{
+      // Acortar títulos largos para que quepan en el eje
+      labels: objetivos.map(o =>
+        o.titulo.length > 30 ? o.titulo.substring(0,28)+"…" : o.titulo),
+      datasets:[{
+        label:"Avance %",
+        data: objetivos.map(o => o.porcentaje),
+        backgroundColor: coloresBarra,
+        borderRadius: 4
+      }]
+    },
+    options:{
+      indexAxis:"y",   // barras horizontales
+      responsive:true,
+      scales:{
+        x:{ beginAtZero:true, max:100, ticks:{ callback:v=>v+"%" } }
+      },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          callbacks:{
+            label: ctx =>
+              ` ${ctx.parsed.x}% — ${objetivos[ctx.dataIndex].estado}`
+          }
+        }
+      }
+    }
+  });
 }
 
 // ════════════════════════════════════════════════════════════
@@ -927,26 +1010,41 @@ async function abrirModalObjetivo(idObjetivo) {
       <div class="ring-label">${objetivoActual.porcentaje}%</div>
       <div>
         <div class="barra-wrap" style="width:200px;height:12px">
-          <div class="barra-fill" style="width:${objetivoActual.porcentaje}%"></div>
+          <div class="barra-fill"
+               style="width:${objetivoActual.porcentaje}%"></div>
         </div>
         <div class="ring-sub" style="margin-top:4px">
-          ${objetivoActual.tareasCompletadas} de ${objetivoActual.tareasTotal} tareas completadas
+          ${objetivoActual.tareasCompletadas} de
+          ${objetivoActual.tareasTotal} tareas completadas
         </div>
       </div>
     </div>
-    ${objetivoActual.descripcion
-      ? `<p style="font-size:13px;color:var(--texto-2);border-left:3px solid var(--borde);
-                   padding-left:12px;margin-bottom:8px">${objetivoActual.descripcion}</p>`:""}
+    ${objetivoActual.descripcion ? `
+      <p style="font-size:13px;color:var(--texto-2);
+                border-left:3px solid var(--borde);
+                padding-left:12px;margin-bottom:8px">
+        ${objetivoActual.descripcion}
+      </p>` : ""}
   `;
 
   // Botones jefe
   document.getElementById("modal-footer-jefe").innerHTML =
     usuario.rol === "Jefe" ? `
       <button class="btn btn-secondary btn-sm"
-              onclick="abrirModalEditar('${idObjetivo}')">Editar objetivo</button>
+              onclick="abrirModalEditar('${idObjetivo}')">
+        Editar objetivo
+      </button>
       <button class="btn btn-danger btn-sm"
-              onclick="eliminarObjetivo('${idObjetivo}')">Eliminar</button>
-    ` : "";
+              onclick="eliminarObjetivo('${idObjetivo}')">
+        Eliminar
+      </button>` : "";
+
+  // Limpiar formulario de avance
+  document.getElementById("inp-pct").value       = objetivoActual.porcentaje;
+  document.getElementById("pct-label").textContent =
+    objetivoActual.porcentaje + "%";
+  document.getElementById("inp-comentario").value = "";
+  document.getElementById("inp-evidencia").value  = "";
 
   document.getElementById("modal-objetivo").classList.add("abierto");
   ocultarFormTareaModal();
@@ -962,27 +1060,29 @@ function cerrarModal() {
   objetivoActual = null;
 }
 
-// ── Tareas en el modal ──────────────────────────────────────
+// ── Tareas ──────────────────────────────────────────────────
 async function cargarTareas(idObjetivo) {
   const lista = document.getElementById("modal-tareas-lista");
-  lista.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+  lista.innerHTML =
+    `<div class="loading"><div class="spinner"></div></div>`;
 
   const r = await api({ action:"getTareas", idObjetivo });
-
   if (!r.ok || !r.data.length) {
-    lista.innerHTML = `<p style="font-size:13px;color:var(--texto-2)">
-      Sin tareas registradas.</p>`;
+    lista.innerHTML =
+      `<p style="font-size:13px;color:var(--texto-2)">
+         Sin tareas registradas.</p>`;
     return;
   }
-
   lista.innerHTML = r.data.map(t => `
-    <div class="tarea-item ${t.completada ? 'completada' : ''}">
-      <div class="tarea-check ${t.completada ? 'hecho' : ''}"
-           onclick="${t.completada ? '' : `pedirConfirmarTarea('${t.id}','${escapar(t.descripcion)}')`}">
-        ${t.completada ? '✓' : ''}
+    <div class="tarea-item ${t.completada ? "completada" : ""}">
+      <div class="tarea-check ${t.completada ? "hecho" : ""}"
+           onclick="${t.completada
+             ? ""
+             : `pedirConfirmarTarea('${t.id}','${escapar(t.descripcion)}')`}">
+        ${t.completada ? "✓" : ""}
       </div>
       <div class="tarea-texto">
-        <span class="${t.completada ? 'tarea-completada-txt' : ''}">
+        <span class="${t.completada ? "tarea-completada-txt" : ""}">
           ${t.descripcion}
         </span>
         ${t.completada ? `
@@ -1012,14 +1112,15 @@ async function guardarTareaModal() {
   if (!desc) return;
 
   const r = await api({
-    action:"createTareas", idObjetivo:objetivoActual.id, tareas:[desc]
+    action:"createTareas",
+    idObjetivo: objetivoActual.id,
+    tareas: [desc]
   });
   if (!r.ok) { alert("Error: " + r.error); return; }
 
   ocultarFormTareaModal();
   await cargarTareas(objetivoActual.id);
   await cargarObjetivos();
-  // Refrescar el contador en el detalle del modal
   const obj = objetivos.find(o => o.id === objetivoActual.id);
   if (obj) objetivoActual = obj;
 }
@@ -1030,7 +1131,6 @@ function pedirConfirmarTarea(idTarea, descripcion) {
   document.getElementById("confirmar-tarea-desc").textContent = descripcion;
   document.getElementById("modal-confirmar-tarea").classList.add("abierto");
 }
-
 function cerrarModalConfirmar() {
   document.getElementById("modal-confirmar-tarea").classList.remove("abierto");
   tareaAConfirmar = null;
@@ -1038,21 +1138,20 @@ function cerrarModalConfirmar() {
 
 async function confirmarTarea() {
   if (!tareaAConfirmar) return;
-
-  const btn = document.querySelector("#modal-confirmar-tarea .btn-success");
+  const btn =
+    document.querySelector("#modal-confirmar-tarea .btn-success");
   btn.textContent = "Guardando…"; btn.disabled = true;
 
   const r = await api({
-    action:"completarTarea", idTarea:tareaAConfirmar, userId:usuario.id
+    action:"completarTarea",
+    idTarea: tareaAConfirmar,
+    userId:  usuario.id
   });
 
   btn.textContent = "Sí, completar"; btn.disabled = false;
-
   if (!r.ok) { alert("Error: " + r.error); return; }
 
   cerrarModalConfirmar();
-
-  // Recargar tareas, avances y tabla
   await cargarObjetivos();
   if (objetivoActual) {
     const obj = objetivos.find(o => o.id === objetivoActual.id);
@@ -1061,23 +1160,27 @@ async function confirmarTarea() {
       cargarTareas(objetivoActual.id),
       cargarAvances(objetivoActual.id)
     ]);
-    // Actualizar el % en el detalle del modal
-    document.querySelector(".ring-label").textContent = objetivoActual.porcentaje + "%";
-    document.querySelector(".barra-fill").style.width = objetivoActual.porcentaje + "%";
+    document.querySelector(".ring-label").textContent =
+      objetivoActual.porcentaje + "%";
+    document.querySelector(".barra-fill").style.width =
+      objetivoActual.porcentaje + "%";
     document.querySelector(".ring-sub").textContent =
-      `${objetivoActual.tareasCompletadas} de ${objetivoActual.tareasTotal} tareas completadas`;
+      `${objetivoActual.tareasCompletadas} de ` +
+      `${objetivoActual.tareasTotal} tareas completadas`;
   }
 }
 
-// ── Avances ─────────────────────────────────────────────────
+// ── Avances — EVIDENCIA DE REGRESO ─────────────────────────
 async function cargarAvances(idObjetivo) {
   const lista = document.getElementById("avances-lista");
-  lista.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+  lista.innerHTML =
+    `<div class="loading"><div class="spinner"></div></div>`;
 
   const r = await api({ action:"getAvances", idObjetivo });
   if (!r.ok || !r.data.length) {
-    lista.innerHTML = `<p style="font-size:13px;color:var(--texto-2)">
-      Sin avances registrados aún.</p>`;
+    lista.innerHTML =
+      `<p style="font-size:13px;color:var(--texto-2)">
+         Sin avances registrados aún.</p>`;
     return;
   }
   lista.innerHTML = r.data.map(a => `
@@ -1087,13 +1190,83 @@ async function cargarAvances(idObjetivo) {
         <span class="avance-pct">${a.porcentaje}%</span>
       </div>
       <div style="color:var(--texto-2);margin-bottom:4px">
-        ${a.comentario||"Sin comentario"}</div>
-      ${a.evidenciaLink
-        ? `<a href="${a.evidenciaLink}" target="_blank"
-              style="font-size:12px;color:var(--azul)">Ver evidencia →</a>`:""}
+        ${a.comentario || "Sin comentario"}
+      </div>
+      ${a.evidenciaLink ? `
+        <a href="${a.evidenciaLink}" target="_blank"
+           style="font-size:12px;color:var(--azul)">
+          Ver evidencia →
+        </a>` : ""}
       <div style="font-size:11px;color:var(--texto-2);margin-top:6px">
-        ${a.fechaRegistro}</div>
+        ${a.fechaRegistro}
+      </div>
     </div>`).join("");
+}
+
+// ════════════════════════════════════════════════════════════
+// GUARDAR AVANCE — evidencia incluida
+// ════════════════════════════════════════════════════════════
+async function guardarAvance() {
+  if (!objetivoActual) return;
+
+  const pct        = document.getElementById("inp-pct").value;
+  const comentario = document.getElementById("inp-comentario").value.trim();
+  const evidencia  = document.getElementById("inp-evidencia").value.trim();
+
+  const btn =
+    document.querySelector("#modal-avance-form .btn-success");
+  btn.textContent = "Guardando…"; btn.disabled = true;
+
+  const r = await api({
+    action:        "createAvance",
+    idObjetivo:    objetivoActual.id,
+    userId:        usuario.id,
+    porcentaje:    pct,
+    comentario,
+    evidenciaLink: evidencia
+  });
+
+  btn.textContent = "Guardar avance"; btn.disabled = false;
+  if (!r.ok) { alert("Error: " + r.error); return; }
+
+  document.getElementById("inp-comentario").value = "";
+  document.getElementById("inp-evidencia").value  = "";
+
+  await cargarAvances(objetivoActual.id);
+  await cargarObjetivos();
+  cerrarModal();
+}
+
+// ════════════════════════════════════════════════════════════
+// TAREAS EN FORMULARIO NUEVO OBJETIVO
+// ════════════════════════════════════════════════════════════
+let contadorTareas = 0;
+
+function agregarTareaForm() {
+  contadorTareas++;
+  const id    = `tarea-inp-${contadorTareas}`;
+  const lista = document.getElementById("tareas-form-lista");
+  const div   = document.createElement("div");
+  div.className = "tarea-form-item";
+  div.id = `tarea-form-wrap-${contadorTareas}`;
+  div.innerHTML = `
+    <input type="text" id="${id}"
+           placeholder="Descripción de la tarea ${contadorTareas}"/>
+    <button type="button" class="btn-quitar-tarea"
+            onclick="quitarTareaForm(${contadorTareas})">×</button>`;
+  lista.appendChild(div);
+  document.getElementById(id).focus();
+}
+
+function quitarTareaForm(n) {
+  document.getElementById(`tarea-form-wrap-${n}`)?.remove();
+}
+
+function obtenerTareasForm() {
+  return Array.from(
+    document.getElementById("tareas-form-lista")
+            .querySelectorAll("input")
+  ).map(i => i.value.trim()).filter(Boolean);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1108,13 +1281,15 @@ async function guardarObjetivo() {
   const prioridad = document.getElementById("nv-prioridad").value;
   const tareas    = obtenerTareasForm();
 
-  // Asignado: Jefe elige, colaborador se asigna a sí mismo
+  // Jefe elige asignado; colaborador se asigna a sí mismo
   const asignado = usuario.rol === "Jefe"
     ? document.getElementById("nv-asignado").value
     : usuario.id;
 
   if (!titulo)   { mostrarError("nv-error","El título es obligatorio"); return; }
-  if (!asignado) { mostrarError("nv-error","Selecciona a quién asignar el objetivo"); return; }
+  if (!asignado) {
+    mostrarError("nv-error","Selecciona a quién asignar el objetivo"); return;
+  }
   if (!limite)   { mostrarError("nv-error","La fecha límite es obligatoria"); return; }
 
   const btn = document.querySelector("#tab-nuevo .btn-primary");
@@ -1129,7 +1304,6 @@ async function guardarObjetivo() {
   btn.textContent = "Guardar objetivo"; btn.disabled = false;
   if (!r.ok) { mostrarError("nv-error", r.error); return; }
 
-  // Limpiar formulario
   document.getElementById("nv-titulo").value  = "";
   document.getElementById("nv-desc").value    = "";
   document.getElementById("nv-limite").value  = "";
@@ -1150,9 +1324,9 @@ function abrirModalEditar(idObjetivo) {
   cerrarModal();
 
   document.getElementById("ed-titulo").value  = o.titulo;
-  document.getElementById("ed-desc").value    = o.descripcion||"";
-  document.getElementById("ed-inicio").value  = o.fechaInicio||"";
-  document.getElementById("ed-limite").value  = o.fechaLimite||"";
+  document.getElementById("ed-desc").value    = o.descripcion || "";
+  document.getElementById("ed-inicio").value  = o.fechaInicio || "";
+  document.getElementById("ed-limite").value  = o.fechaLimite || "";
 
   llenarSelectUsuarios("ed-asignado");
   document.getElementById("ed-asignado").value = o.idAsignado;
@@ -1186,14 +1360,20 @@ async function guardarEdicion() {
     estado:      document.getElementById("ed-estado").value,
     prioridad:   document.getElementById("ed-prioridad").value
   };
-  if (!campos.titulo)      { mostrarError("ed-error","El título es obligatorio"); return; }
-  if (!campos.fechaLimite) { mostrarError("ed-error","La fecha límite es obligatoria"); return; }
+  if (!campos.titulo) {
+    mostrarError("ed-error","El título es obligatorio"); return;
+  }
+  if (!campos.fechaLimite) {
+    mostrarError("ed-error","La fecha límite es obligatoria"); return;
+  }
 
   const btn = document.querySelector("#modal-editar .btn-primary");
   btn.textContent = "Guardando…"; btn.disabled = true;
 
   const r = await api({
-    action:"updateObjetivo", idObjetivo:objetivoActual.id, campos
+    action:"updateObjetivo",
+    idObjetivo: objetivoActual.id,
+    campos
   });
 
   btn.textContent = "Guardar cambios"; btn.disabled = false;
@@ -1207,10 +1387,13 @@ async function guardarEdicion() {
 // ELIMINAR OBJETIVO
 // ════════════════════════════════════════════════════════════
 async function eliminarObjetivo(idObjetivo) {
-  if (!confirm("¿Seguro que deseas eliminar este objetivo? No se puede deshacer."))
+  if (!confirm(
+    "¿Seguro que deseas eliminar este objetivo? No se puede deshacer."))
     return;
-  const r = await api({ action:"deleteObjetivo", idObjetivo, rol:usuario.rol });
-  if (!r.ok) { alert("Error: "+r.error); return; }
+  const r = await api({
+    action:"deleteObjetivo", idObjetivo, rol:usuario.rol
+  });
+  if (!r.ok) { alert("Error: " + r.error); return; }
   cerrarModal();
   await cargarObjetivos();
 }
@@ -1220,7 +1403,8 @@ async function eliminarObjetivo(idObjetivo) {
 // ════════════════════════════════════════════════════════════
 function cambiarTab(tabId) {
   ["tab-dashboard","tab-objetivos","tab-nuevo"].forEach(id => {
-    document.getElementById(id).style.display = id===tabId ? "block" : "none";
+    document.getElementById(id).style.display =
+      id === tabId ? "block" : "none";
   });
   document.querySelectorAll(".tab").forEach(btn =>
     btn.classList.toggle("activo", btn.dataset.tab === tabId)
@@ -1238,7 +1422,7 @@ function cerrarSesion() {
 }
 
 document.addEventListener("keydown", e => {
-  if (e.key==="Escape") {
+  if (e.key === "Escape") {
     cerrarModal(); cerrarModalEditar(); cerrarModalConfirmar();
   }
 });
