@@ -18,7 +18,6 @@
     body { font-family: 'Segoe UI', sans-serif; background: var(--bg);
            color: var(--texto); min-height: 100vh; }
 
-    /* LOGIN */
     #pantalla-login {
       display: flex; align-items: center; justify-content: center;
       min-height: 100vh;
@@ -32,7 +31,6 @@
     .login-logo h1 { font-size: 22px; font-weight: 700; color: #1a365d; }
     .login-logo p  { font-size: 13px; color: var(--texto-2); margin-top: 4px; }
 
-    /* FORMULARIOS */
     .campo { margin-bottom: 16px; }
     label  { display: block; font-size: 13px; font-weight: 600;
              color: var(--texto); margin-bottom: 6px; }
@@ -59,8 +57,8 @@
     .btn-success   { background: var(--verde); color: #fff; }
     .btn-danger    { background: var(--rojo);  color: #fff; }
     .btn-secondary { background: var(--borde); color: var(--texto); }
-    .btn-sm        { padding: 6px 12px; font-size: 12px; }
-    .btn-xs        { padding: 4px 10px; font-size: 11px; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-xs { padding: 4px 10px; font-size: 11px; }
 
     .error-msg {
       background: #fff5f5; border: 1px solid #feb2b2; color: var(--rojo);
@@ -68,7 +66,6 @@
       margin-top: 12px; display: none;
     }
 
-    /* APP */
     #pantalla-app { display: none; }
 
     .header {
@@ -78,37 +75,27 @@
     }
     .header h2 { font-size: 16px; font-weight: 700; }
     .header-user { display: flex; align-items: center; gap: 12px; font-size: 13px; }
-    .badge-rol {
-      background: rgba(255,255,255,.2); padding: 3px 10px;
-      border-radius: 20px; font-size: 12px;
-    }
-    .btn-logout {
-      background: rgba(255,255,255,.15); border: none; color: #fff;
-      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
-    }
+    .badge-rol { background: rgba(255,255,255,.2); padding: 3px 10px;
+                 border-radius: 20px; font-size: 12px; }
+    .btn-logout { background: rgba(255,255,255,.15); border: none; color: #fff;
+                  padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
 
     .main { padding: 24px; max-width: 1100px; margin: 0 auto; }
 
-    /* TABS */
     .tabs { display: flex; gap: 4px; margin-bottom: 24px;
             border-bottom: 2px solid var(--borde); }
-    .tab {
-      padding: 10px 20px; border: none; background: none;
-      font-size: 14px; font-weight: 600; color: var(--texto-2);
-      cursor: pointer; border-bottom: 2px solid transparent;
-      margin-bottom: -2px; transition: color .2s;
-    }
+    .tab { padding: 10px 20px; border: none; background: none;
+           font-size: 14px; font-weight: 600; color: var(--texto-2);
+           cursor: pointer; border-bottom: 2px solid transparent;
+           margin-bottom: -2px; transition: color .2s; }
     .tab.activo { color: var(--azul); border-bottom-color: var(--azul); }
 
-    /* RESUMEN */
     .resumen-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
       gap: 16px; margin-bottom: 24px;
     }
-    .resumen-card {
-      background: var(--card); border: 1px solid var(--borde);
-      border-radius: var(--radio); padding: 20px; text-align: center;
-    }
+    .resumen-card { background: var(--card); border: 1px solid var(--borde);
+                    border-radius: var(--radio); padding: 20px; text-align: center; }
     .resumen-card .numero { font-size: 36px; font-weight: 700; line-height: 1; }
     .resumen-card .etiqueta { font-size: 12px; color: var(--texto-2); margin-top: 6px; }
     .num-total      { color: var(--azul); }
@@ -116,54 +103,38 @@
     .num-completado { color: var(--verde); }
     .num-atrasado   { color: var(--rojo); }
 
-    /* GRÁFICAS */
-    .graficas-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 16px; margin-bottom: 24px;
-    }
+    .graficas-grid { display: grid; grid-template-columns: 1fr 1fr;
+                     gap: 16px; margin-bottom: 24px; }
     @media (max-width:700px) { .graficas-grid { grid-template-columns: 1fr; } }
-    .grafica-card {
-      background: var(--card); border: 1px solid var(--borde);
-      border-radius: var(--radio); padding: 20px;
-    }
+    .grafica-card { background: var(--card); border: 1px solid var(--borde);
+                    border-radius: var(--radio); padding: 20px; }
     .grafica-card h3 { font-size: 14px; font-weight: 600;
                        color: var(--texto-2); margin-bottom: 16px; }
 
-    /* FILTROS */
     .filtros { display: flex; gap: 12px; flex-wrap: wrap;
                margin-bottom: 16px; align-items: flex-end; }
     .filtros .campo { margin: 0; flex: 1; min-width: 140px; }
 
-    /* TABLA */
-    .tabla-wrap {
-      background: var(--card); border: 1px solid var(--borde);
-      border-radius: var(--radio); overflow-x: auto;
-    }
+    .tabla-wrap { background: var(--card); border: 1px solid var(--borde);
+                  border-radius: var(--radio); overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th {
-      background: #f0f4f8; padding: 12px 16px; text-align: left;
-      font-weight: 600; color: var(--texto-2); white-space: nowrap;
-    }
+    thead th { background: #f0f4f8; padding: 12px 16px; text-align: left;
+               font-weight: 600; color: var(--texto-2); white-space: nowrap; }
     tbody tr { border-top: 1px solid var(--borde); }
     tbody tr:hover { background: #f7fafc; }
     tbody td { padding: 12px 16px; vertical-align: middle; }
 
-    /* SEMÁFORO */
     .semaforo { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
     .sem-verde    { background: var(--verde); }
     .sem-amarillo { background: var(--amarillo); }
     .sem-rojo     { background: var(--rojo); }
     .sem-gris     { background: var(--gris); }
 
-    /* BARRA */
-    .barra-wrap {
-      background: var(--borde); border-radius: 10px;
-      height: 8px; width: 100px; overflow: hidden;
-    }
+    .barra-wrap { background: var(--borde); border-radius: 10px;
+                  height: 8px; width: 100px; overflow: hidden; }
     .barra-fill { height: 100%; border-radius: 10px;
                   background: var(--azul); transition: width .4s; }
 
-    /* BADGES */
     .badge { display: inline-block; padding: 3px 10px;
              border-radius: 20px; font-size: 11px; font-weight: 600; }
     .badge-pendiente  { background: #ebf8ff; color: #2b6cb0; }
@@ -173,89 +144,54 @@
     .badge-cancelado  { background: #f7fafc; color: #718096; }
     .badge-pausado    { background: #faf5ff; color: #553c9a; }
 
-    /* MODAL */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.5); z-index: 200;
-      align-items: center; justify-content: center; padding: 16px;
-    }
+    .modal-overlay { display: none; position: fixed; inset: 0;
+                     background: rgba(0,0,0,.5); z-index: 200;
+                     align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.abierto { display: flex; }
-    .modal {
-      background: var(--card); border-radius: 12px; padding: 28px;
-      width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto;
-    }
-    .modal-header {
-      display: flex; justify-content: space-between;
-      align-items: center; margin-bottom: 20px;
-    }
+    .modal { background: var(--card); border-radius: 12px; padding: 28px;
+             width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between;
+                    align-items: center; margin-bottom: 20px; }
     .modal-header h3 { font-size: 17px; }
-    .btn-cerrar {
-      background: none; border: none; font-size: 22px;
-      cursor: pointer; color: var(--texto-2); line-height: 1;
-    }
+    .btn-cerrar { background: none; border: none; font-size: 22px;
+                  cursor: pointer; color: var(--texto-2); line-height: 1; }
     .modal-footer { display: flex; gap: 10px;
                     justify-content: flex-end; margin-top: 20px; }
 
-    /* TAREAS */
-    .tarea-item {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 10px 12px; border: 1px solid var(--borde);
-      border-radius: var(--radio); margin-bottom: 8px;
-      transition: background .2s;
-    }
+    .tarea-item { display: flex; align-items: flex-start; gap: 10px;
+                  padding: 10px 12px; border: 1px solid var(--borde);
+                  border-radius: var(--radio); margin-bottom: 8px; transition: background .2s; }
     .tarea-item.completada { background: #f0fff4; border-color: #9ae6b4; }
-    .tarea-check {
-      width: 18px; height: 18px; border: 2px solid var(--borde);
-      border-radius: 4px; flex-shrink: 0; margin-top: 1px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all .2s;
-    }
-    .tarea-check.hecho {
-      background: var(--verde); border-color: var(--verde); color: #fff;
-      cursor: default;
-    }
+    .tarea-check { width: 18px; height: 18px; border: 2px solid var(--borde);
+                   border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+                   display: flex; align-items: center; justify-content: center;
+                   cursor: pointer; transition: all .2s; }
+    .tarea-check.hecho { background: var(--verde); border-color: var(--verde);
+                         color: #fff; cursor: default; }
     .tarea-texto { flex: 1; font-size: 13px; }
     .tarea-meta  { font-size: 11px; color: var(--texto-2); margin-top: 2px; }
     .tarea-completada-txt { text-decoration: line-through; color: var(--texto-2); }
 
-    /* AVANCES */
-    .avance-item {
-      border: 1px solid var(--borde); border-radius: var(--radio);
-      padding: 12px; margin-bottom: 10px; font-size: 13px;
-    }
-    .avance-header {
-      display: flex; justify-content: space-between;
-      font-weight: 600; margin-bottom: 4px;
-    }
+    .avance-item { border: 1px solid var(--borde); border-radius: var(--radio);
+                   padding: 12px; margin-bottom: 10px; font-size: 13px; }
+    .avance-header { display: flex; justify-content: space-between;
+                     font-weight: 600; margin-bottom: 4px; }
     .avance-pct { color: var(--azul); font-size: 15px; }
 
-    /* LISTA DE TAREAS EN FORMULARIO */
     .tareas-form-lista { margin-bottom: 8px; }
-    .tarea-form-item {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 8px;
-    }
+    .tarea-form-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .tarea-form-item input { margin: 0; }
-    .btn-quitar-tarea {
-      background: none; border: none; color: var(--rojo);
-      font-size: 18px; cursor: pointer; line-height: 1; flex-shrink: 0;
-    }
+    .btn-quitar-tarea { background: none; border: none; color: var(--rojo);
+                        font-size: 18px; cursor: pointer; line-height: 1; flex-shrink: 0; }
 
-    /* LOADING / VACÍO */
-    .loading { text-align: center; padding: 40px;
-               color: var(--texto-2); font-size: 14px; }
-    .spinner {
-      display: inline-block; width: 24px; height: 24px;
-      border: 3px solid var(--borde); border-top-color: var(--azul);
-      border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 10px;
-    }
+    .loading { text-align: center; padding: 40px; color: var(--texto-2); font-size: 14px; }
+    .spinner { display: inline-block; width: 24px; height: 24px;
+               border: 3px solid var(--borde); border-top-color: var(--azul);
+               border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 10px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .vacio { text-align: center; padding: 48px;
-             color: var(--texto-2); font-size: 14px; }
+    .vacio { text-align: center; padding: 48px; color: var(--texto-2); font-size: 14px; }
 
-    /* PROGRESS RING EN MODAL */
-    .progress-ring { display: flex; align-items: center;
-                     gap: 16px; margin-bottom: 16px; }
+    .progress-ring { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
     .ring-label { font-size: 28px; font-weight: 700; color: var(--azul); }
     .ring-sub   { font-size: 12px; color: var(--texto-2); }
   </style>
@@ -296,7 +232,7 @@
   </div>
 
   <div class="main">
-    <div class="tabs" id="tabs-container">
+    <div class="tabs">
       <button class="tab activo" data-tab="tab-dashboard"
               id="btn-tab-dashboard" onclick="cambiarTab('tab-dashboard')">
         Dashboard
@@ -311,8 +247,9 @@
       </button>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- ── DASHBOARD ───────────────────────────────────── -->
     <div id="tab-dashboard">
+      <!-- Tarjetas visibles para todos -->
       <div class="resumen-grid">
         <div class="resumen-card">
           <div class="numero num-total"      id="res-total">—</div>
@@ -331,7 +268,9 @@
           <div class="etiqueta">Atrasados</div>
         </div>
       </div>
-      <div class="graficas-grid" id="seccion-graficas">
+
+      <!-- Gráficas Jefe -->
+      <div class="graficas-grid" id="seccion-graficas-jefe" style="display:none">
         <div class="grafica-card">
           <h3>Objetivos por estado</h3>
           <canvas id="grafica-estados" height="200"></canvas>
@@ -341,9 +280,27 @@
           <canvas id="grafica-colaboradores" height="200"></canvas>
         </div>
       </div>
+
+      <!-- Dashboard Colaborador -->
+      <div id="seccion-graficas-colab" style="display:none">
+        <div class="resumen-grid" style="margin-bottom:24px">
+          <div class="resumen-card">
+            <div class="numero num-completado" id="colab-promedio">—</div>
+            <div class="etiqueta">Avance promedio</div>
+          </div>
+          <div class="resumen-card">
+            <div class="numero num-atrasado" id="colab-prox">—</div>
+            <div class="etiqueta">Vencen en 7 días</div>
+          </div>
+        </div>
+        <div class="grafica-card">
+          <h3>Mi avance por objetivo</h3>
+          <canvas id="grafica-personal"></canvas>
+        </div>
+      </div>
     </div>
 
-    <!-- OBJETIVOS -->
+    <!-- ── OBJETIVOS ────────────────────────────────────── -->
     <div id="tab-objetivos" style="display:none">
       <div class="filtros">
         <div class="campo">
@@ -378,21 +335,22 @@
           <thead>
             <tr>
               <th></th><th>Objetivo</th><th>Asignado a</th>
-              <th>Prioridad</th><th>Avance</th>
-              <th>Tareas</th><th>Estado</th>
-              <th>Fecha límite</th><th>Acciones</th>
+              <th>Prioridad</th><th>Avance</th><th>Tareas</th>
+              <th>Estado</th><th>Fecha límite</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody id="tabla-body">
             <tr><td colspan="9">
-              <div class="loading"><div class="spinner"></div><br>Cargando…</div>
+              <div class="loading">
+                <div class="spinner"></div><br>Cargando…
+              </div>
             </td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- NUEVO OBJETIVO -->
+    <!-- ── NUEVO OBJETIVO ───────────────────────────────── -->
     <div id="tab-nuevo" style="display:none">
       <div style="background:var(--card);border:1px solid var(--borde);
                   border-radius:var(--radio);padding:28px;max-width:600px">
@@ -406,8 +364,7 @@
         <div class="campo">
           <label>Descripción</label>
           <textarea id="nv-desc"
-                    placeholder="Describe el objetivo, metas específicas, indicadores…">
-          </textarea>
+                    placeholder="Describe el objetivo, metas específicas, indicadores…"></textarea>
         </div>
 
         <!-- Solo visible para Jefe -->
@@ -443,7 +400,6 @@
           </div>
         </div>
 
-        <!-- TAREAS -->
         <div class="campo">
           <label>Tareas / pasos del objetivo</label>
           <div class="tareas-form-lista" id="tareas-form-lista"></div>
@@ -477,14 +433,13 @@
 
     <!-- Tareas -->
     <div style="margin-top:20px;border-top:1px solid var(--borde);padding-top:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;
-                  margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;
+                  align-items:center;margin-bottom:12px">
         <h4 style="font-size:14px">Tareas</h4>
         <button class="btn btn-secondary btn-xs" id="btn-add-tarea-modal"
                 onclick="mostrarFormTareaModal()">+ Agregar tarea</button>
       </div>
       <div id="modal-tareas-lista"></div>
-      <!-- Form para agregar tareas desde el modal -->
       <div id="form-tarea-modal" style="display:none;margin-top:10px">
         <div style="display:flex;gap:8px">
           <input type="text" id="inp-nueva-tarea"
@@ -497,37 +452,31 @@
       </div>
     </div>
 
-<!-- Registrar avance -->
-<div id="modal-avance-form"
-     style="margin-top:20px;border-top:1px solid var(--borde);padding-top:20px">
-  <h4 style="font-size:14px;margin-bottom:12px">Registrar avance</h4>
-  <div class="campo">
-    <label>Porcentaje de avance:
-      <strong id="pct-label">0%</strong>
-    </label>
-    <input type="range" id="inp-pct" min="0" max="100" value="0"
-           oninput="document.getElementById('pct-label').textContent=this.value+'%'"/>
-  </div>
-  <div class="campo">
-    <label>Comentario</label>
-    <textarea id="inp-comentario"
-              placeholder="Describe el avance realizado…"></textarea>
-  </div>
-  <div class="campo">
-    <label>Evidencia (link de Drive u otro)</label>
-    <input type="url" id="inp-evidencia"
-           placeholder="https://drive.google.com/…"/>
-  </div>
-  <button class="btn btn-success btn-sm"
-          onclick="guardarAvance()">Guardar avance</button>
-</div>
+    <!-- Registrar avance -->
+    <div id="modal-avance-form"
+         style="margin-top:20px;border-top:1px solid var(--borde);padding-top:20px">
+      <h4 style="font-size:14px;margin-bottom:12px">Registrar avance</h4>
+      <div class="campo">
+        <label>Porcentaje de avance:
+          <strong id="pct-label">0%</strong>
+        </label>
+        <input type="range" id="inp-pct" min="0" max="100" value="0"
+               oninput="document.getElementById('pct-label').textContent=this.value+'%'"/>
+      </div>
+      <div class="campo">
+        <label>Comentario</label>
+        <textarea id="inp-comentario"
+                  placeholder="Describe el avance realizado…"></textarea>
+      </div>
+      <div class="campo">
+        <label>Evidencia (link de Drive u otro)</label>
+        <input type="url" id="inp-evidencia"
+               placeholder="https://drive.google.com/…"/>
+      </div>
+      <button class="btn btn-success btn-sm"
+              onclick="guardarAvance()">Guardar avance</button>
+    </div>
 
-<!-- Historial de avances -->
-<div style="margin-top:20px;border-top:1px solid var(--borde);padding-top:16px">
-  <h4 style="font-size:14px;margin-bottom:12px">Historial de avances</h4>
-  <div id="avances-lista"></div>
-</div>
-    
     <!-- Historial de avances -->
     <div style="margin-top:20px;border-top:1px solid var(--borde);padding-top:16px">
       <h4 style="font-size:14px;margin-bottom:12px">Historial de avances</h4>
@@ -543,26 +492,20 @@
   <div class="modal" style="max-width:400px">
     <div class="modal-header">
       <h3>Confirmar tarea</h3>
-      <button class="btn-cerrar"
-              onclick="cerrarModalConfirmar()">×</button>
+      <button class="btn-cerrar" onclick="cerrarModalConfirmar()">×</button>
     </div>
     <p style="font-size:14px;margin-bottom:8px">
       ¿Marcar como completada la siguiente tarea?
     </p>
     <p id="confirmar-tarea-desc"
-       style="font-size:14px;font-weight:600;
-              padding:10px;background:var(--bg);
-              border-radius:var(--radio);margin-bottom:16px"></p>
+       style="font-size:14px;font-weight:600;padding:10px;
+              background:var(--bg);border-radius:var(--radio);margin-bottom:16px"></p>
     <p style="font-size:12px;color:var(--rojo);margin-bottom:16px">
       ⚠ Esta acción no se puede deshacer.
     </p>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="cerrarModalConfirmar()">
-        Cancelar
-      </button>
-      <button class="btn btn-success"   onclick="confirmarTarea()">
-        Sí, completar
-      </button>
+      <button class="btn btn-secondary" onclick="cerrarModalConfirmar()">Cancelar</button>
+      <button class="btn btn-success"   onclick="confirmarTarea()">Sí, completar</button>
     </div>
   </div>
 </div>
@@ -603,14 +546,8 @@
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════
-// CONFIGURACIÓN
-// ════════════════════════════════════════════════════════════
 const API_URL = "https://script.google.com/macros/s/AKfycbzQGfIMpcPstRdt0OCq-ZEfJylpG1o_cFNePX3tH8R66nbm8qrx7yfKZrpuaawB8pLf/exec";
 
-// ════════════════════════════════════════════════════════════
-// ESTADO GLOBAL
-// ════════════════════════════════════════════════════════════
 let usuario         = null;
 let objetivos       = [];
 let usuarios        = [];
@@ -621,9 +558,6 @@ let graficaEstados  = null;
 let graficaColabs   = null;
 let graficaPersonal = null;
 
-// ════════════════════════════════════════════════════════════
-// UTILIDADES
-// ════════════════════════════════════════════════════════════
 async function api(body) {
   const res = await fetch(API_URL, { method:"POST", body:JSON.stringify(body) });
   return res.json();
@@ -645,25 +579,19 @@ function formatFecha(f) {
 
 function badgeEstado(estado) {
   const map = {
-    "Pendiente":   "badge-pendiente",
-    "En progreso": "badge-progreso",
-    "Completado":  "badge-completado",
-    "Atrasado":    "badge-atrasado",
-    "Cancelado":   "badge-cancelado",
-    "Pausado":     "badge-pausado"
+    "Pendiente":"badge-pendiente","En progreso":"badge-progreso",
+    "Completado":"badge-completado","Atrasado":"badge-atrasado",
+    "Cancelado":"badge-cancelado","Pausado":"badge-pausado"
   };
   return `<span class="badge ${map[estado]||""}">${estado}</span>`;
 }
 
-// ════════════════════════════════════════════════════════════
-// SESIÓN
-// ════════════════════════════════════════════════════════════
+// ── Sesión ──────────────────────────────────────────────────
 function guardarSesion(u) { localStorage.setItem("ich_usuario", JSON.stringify(u)); }
 function borrarSesion()   { localStorage.removeItem("ich_usuario"); }
 function leerSesion() {
   try { const r = localStorage.getItem("ich_usuario");
-        return r ? JSON.parse(r) : null; }
-  catch { return null; }
+        return r ? JSON.parse(r) : null; } catch { return null; }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -671,9 +599,7 @@ window.addEventListener("DOMContentLoaded", () => {
   if (s) { usuario = s; iniciarApp(); }
 });
 
-// ════════════════════════════════════════════════════════════
-// LOGIN
-// ════════════════════════════════════════════════════════════
+// ── Login ───────────────────────────────────────────────────
 function resetearBotonLogin() {
   const btn = document.getElementById("btn-login");
   btn.textContent = "Iniciar sesión"; btn.disabled = false;
@@ -703,24 +629,19 @@ document.getElementById("inp-pass").addEventListener("keydown", e => {
   if (e.key === "Enter") hacerLogin();
 });
 
-// ════════════════════════════════════════════════════════════
-// INICIO APP
-// ════════════════════════════════════════════════════════════
+// ── Inicio app ──────────────────────────────────────────────
 async function iniciarApp() {
   document.getElementById("pantalla-login").style.display = "none";
   document.getElementById("pantalla-app").style.display   = "block";
-
   document.getElementById("hdr-nombre").textContent = usuario.nombre;
   document.getElementById("hdr-rol").textContent    = usuario.rol;
 
   const esJefe = usuario.rol === "Jefe";
 
-  // Dashboard visible para ambos roles, gráficas de equipo solo para Jefe
-  document.getElementById("btn-tab-dashboard").style.display = "block";
   document.getElementById("seccion-graficas-jefe").style.display =
-    esJefe ? "grid" : "none";
+    esJefe ? "grid"  : "none";
   document.getElementById("seccion-graficas-colab").style.display =
-    esJefe ? "none" : "block";
+    esJefe ? "none"  : "block";
   document.getElementById("fil-col-wrap").style.display =
     esJefe ? "block" : "none";
   document.getElementById("nv-asignado-wrap").style.display =
@@ -731,7 +652,6 @@ async function iniciarApp() {
   await Promise.all([cargarCatalogo(), cargarUsuarios()]);
   await cargarObjetivos();
 
-  // Poblar filtro de estados
   const filEstado = document.getElementById("fil-estado");
   if (filEstado.options.length === 1) {
     catalogo.estados.forEach(e => {
@@ -742,23 +662,18 @@ async function iniciarApp() {
   }
 }
 
-// ════════════════════════════════════════════════════════════
-// CATÁLOGO
-// ════════════════════════════════════════════════════════════
+// ── Catálogo ────────────────────────────────────────────────
 async function cargarCatalogo() {
   const r = await api({ action:"getCatalogo" });
   if (r.ok) catalogo = { estados: r.estados, prioridades: r.prioridades };
 }
 
-// ════════════════════════════════════════════════════════════
-// USUARIOS
-// ════════════════════════════════════════════════════════════
+// ── Usuarios ────────────────────────────────────────────────
 async function cargarUsuarios() {
   if (usuario.rol !== "Jefe") return;
   const r = await api({ action:"getUsuarios", rol:usuario.rol });
   if (!r.ok) return;
   usuarios = r.data;
-
   const filCol = document.getElementById("fil-colaborador");
   if (filCol.options.length === 1) {
     usuarios.forEach(u => {
@@ -780,9 +695,7 @@ function llenarSelectUsuarios(selectId) {
   });
 }
 
-// ════════════════════════════════════════════════════════════
-// OBJETIVOS
-// ════════════════════════════════════════════════════════════
+// ── Objetivos ───────────────────────────────────────────────
 async function cargarObjetivos() {
   const r = await api({
     action:"getObjetivos", userId:usuario.id, rol:usuario.rol
@@ -797,15 +710,10 @@ async function cargarObjetivos() {
   objetivos = r.data;
   actualizarResumen();
   renderTabla(objetivos);
-
-  if (usuario.rol === "Jefe") {
-    renderGraficasJefe();
-  } else {
-    renderDashboardColab();
-  }
+  if (usuario.rol === "Jefe") renderGraficasJefe();
+  else renderDashboardColab();
 }
 
-// ── Resumen (tarjetas) ──────────────────────────────────────
 function actualizarResumen() {
   document.getElementById("res-total").textContent =
     objetivos.length;
@@ -818,13 +726,11 @@ function actualizarResumen() {
       o.semaforo === "rojo" && o.estado !== "Completado").length;
 }
 
-// ── Tabla ───────────────────────────────────────────────────
 function renderTabla(lista) {
   const tbody = document.getElementById("tabla-body");
   if (!lista.length) {
     tbody.innerHTML = `<tr><td colspan="9">
-      <div class="vacio">No hay objetivos que mostrar</div>
-    </td></tr>`;
+      <div class="vacio">No hay objetivos que mostrar</div></td></tr>`;
     return;
   }
   tbody.innerHTML = lista.map(o => `
@@ -843,8 +749,7 @@ function renderTabla(lista) {
         </div>
       </td>
       <td style="font-size:12px;color:var(--texto-2)">
-        ${o.tareasCompletadas}/${o.tareasTotal}
-      </td>
+        ${o.tareasCompletadas}/${o.tareasTotal}</td>
       <td>${badgeEstado(o.estado)}</td>
       <td style="font-size:12px;color:var(--texto-2)">
         ${formatFecha(o.fechaLimite)}</td>
@@ -869,11 +774,8 @@ function aplicarFiltros() {
   }));
 }
 
-// ════════════════════════════════════════════════════════════
-// DASHBOARD JEFE — gráficas de equipo
-// ════════════════════════════════════════════════════════════
+// ── Gráficas Jefe ───────────────────────────────────────────
 function renderGraficasJefe() {
-  // Dona: objetivos por estado
   const conteo = {};
   objetivos.forEach(o => { conteo[o.estado] = (conteo[o.estado]||0)+1; });
   const colores = {
@@ -886,17 +788,14 @@ function renderGraficasJefe() {
     type:"doughnut",
     data:{
       labels: Object.keys(conteo),
-      datasets:[{
-        data: Object.values(conteo),
-        backgroundColor: Object.keys(conteo).map(e => colores[e]||"#ccc"),
-        borderWidth: 2
-      }]
+      datasets:[{ data:Object.values(conteo),
+        backgroundColor:Object.keys(conteo).map(e=>colores[e]||"#ccc"),
+        borderWidth:2 }]
     },
     options:{ responsive:true,
       plugins:{ legend:{ position:"bottom", labels:{ font:{size:12} } } } }
   });
 
-  // Barras: avance promedio por colaborador
   const porColab = {};
   objetivos.forEach(o => {
     const n = o.nombreAsignado;
@@ -907,17 +806,14 @@ function renderGraficasJefe() {
   const nombres   = Object.keys(porColab);
   const promedios = nombres.map(n =>
     Math.round(porColab[n].suma / porColab[n].total));
-
   const ctx2 = document.getElementById("grafica-colaboradores").getContext("2d");
   if (graficaColabs) graficaColabs.destroy();
   graficaColabs = new Chart(ctx2, {
     type:"bar",
     data:{
       labels: nombres,
-      datasets:[{
-        label:"% promedio", data:promedios,
-        backgroundColor:"#3182ce", borderRadius:4
-      }]
+      datasets:[{ label:"% promedio", data:promedios,
+                  backgroundColor:"#3182ce", borderRadius:4 }]
     },
     options:{ responsive:true,
       scales:{ y:{ beginAtZero:true, max:100,
@@ -926,74 +822,60 @@ function renderGraficasJefe() {
   });
 }
 
-// ════════════════════════════════════════════════════════════
-// DASHBOARD COLABORADOR — resumen personal + gráfica propia
-// ════════════════════════════════════════════════════════════
+// ── Dashboard Colaborador ───────────────────────────────────
 function renderDashboardColab() {
-  // Calcular avance promedio personal
-  const total     = objetivos.length;
-  const promedio  = total > 0
-    ? Math.round(objetivos.reduce((s,o) => s + o.porcentaje, 0) / total)
-    : 0;
+  const total    = objetivos.length;
+  const promedio = total > 0
+    ? Math.round(objetivos.reduce((s,o) => s+o.porcentaje, 0) / total) : 0;
   const proxVencer = objetivos.filter(o =>
     o.diasRestantes >= 0 && o.diasRestantes <= 7 &&
     o.estado !== "Completado").length;
 
-  document.getElementById("colab-promedio").textContent  = promedio + "%";
-  document.getElementById("colab-prox").textContent      = proxVencer;
+  document.getElementById("colab-promedio").textContent = promedio + "%";
+  document.getElementById("colab-prox").textContent     = proxVencer;
 
-  // Gráfica de barras horizontal: un objetivo por barra
   const ctx = document.getElementById("grafica-personal").getContext("2d");
   if (graficaPersonal) graficaPersonal.destroy();
-
-  const coloresBarra = objetivos.map(o => {
-    if (o.semaforo === "rojo")     return "#e53e3e";
-    if (o.semaforo === "amarillo") return "#d69e2e";
-    if (o.semaforo === "gris")     return "#718096";
-    return "#38a169";
-  });
 
   graficaPersonal = new Chart(ctx, {
     type:"bar",
     data:{
-      // Acortar títulos largos para que quepan en el eje
       labels: objetivos.map(o =>
         o.titulo.length > 30 ? o.titulo.substring(0,28)+"…" : o.titulo),
       datasets:[{
         label:"Avance %",
         data: objetivos.map(o => o.porcentaje),
-        backgroundColor: coloresBarra,
+        backgroundColor: objetivos.map(o => {
+          if (o.semaforo === "rojo")     return "#e53e3e";
+          if (o.semaforo === "amarillo") return "#d69e2e";
+          if (o.semaforo === "gris")     return "#718096";
+          return "#38a169";
+        }),
         borderRadius: 4
       }]
     },
     options:{
-      indexAxis:"y",   // barras horizontales
+      indexAxis:"y",
       responsive:true,
-      scales:{
-        x:{ beginAtZero:true, max:100, ticks:{ callback:v=>v+"%" } }
-      },
+      scales:{ x:{ beginAtZero:true, max:100,
+                   ticks:{ callback:v=>v+"%" } } },
       plugins:{
         legend:{ display:false },
-        tooltip:{
-          callbacks:{
-            label: ctx =>
-              ` ${ctx.parsed.x}% — ${objetivos[ctx.dataIndex].estado}`
-          }
-        }
+        tooltip:{ callbacks:{
+          label: ctx =>
+            ` ${ctx.parsed.x}% — ${objetivos[ctx.dataIndex].estado}`
+        }}
       }
     }
   });
 }
 
-// ════════════════════════════════════════════════════════════
-// MODAL: VER OBJETIVO
-// ════════════════════════════════════════════════════════════
+// ── Modal objetivo ──────────────────────────────────────────
 async function abrirModalObjetivo(idObjetivo) {
   objetivoActual = objetivos.find(o => o.id === idObjetivo);
   if (!objetivoActual) return;
 
   document.getElementById("modal-titulo").textContent = objetivoActual.titulo;
-
   document.getElementById("modal-detalle").innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;
                 font-size:13px;margin-bottom:8px">
@@ -1023,28 +905,20 @@ async function abrirModalObjetivo(idObjetivo) {
       <p style="font-size:13px;color:var(--texto-2);
                 border-left:3px solid var(--borde);
                 padding-left:12px;margin-bottom:8px">
-        ${objetivoActual.descripcion}
-      </p>` : ""}
+        ${objetivoActual.descripcion}</p>` : ""}
   `;
 
-  // Botones jefe
   document.getElementById("modal-footer-jefe").innerHTML =
     usuario.rol === "Jefe" ? `
       <button class="btn btn-secondary btn-sm"
-              onclick="abrirModalEditar('${idObjetivo}')">
-        Editar objetivo
-      </button>
+              onclick="abrirModalEditar('${idObjetivo}')">Editar objetivo</button>
       <button class="btn btn-danger btn-sm"
-              onclick="eliminarObjetivo('${idObjetivo}')">
-        Eliminar
-      </button>` : "";
+              onclick="eliminarObjetivo('${idObjetivo}')">Eliminar</button>` : "";
 
-  // Limpiar formulario de avance
-  document.getElementById("inp-pct").value       = objetivoActual.porcentaje;
-  document.getElementById("pct-label").textContent =
-    objetivoActual.porcentaje + "%";
-  document.getElementById("inp-comentario").value = "";
-  document.getElementById("inp-evidencia").value  = "";
+  document.getElementById("inp-pct").value          = objetivoActual.porcentaje;
+  document.getElementById("pct-label").textContent  = objetivoActual.porcentaje + "%";
+  document.getElementById("inp-comentario").value   = "";
+  document.getElementById("inp-evidencia").value    = "";
 
   document.getElementById("modal-objetivo").classList.add("abierto");
   ocultarFormTareaModal();
@@ -1065,26 +939,22 @@ async function cargarTareas(idObjetivo) {
   const lista = document.getElementById("modal-tareas-lista");
   lista.innerHTML =
     `<div class="loading"><div class="spinner"></div></div>`;
-
   const r = await api({ action:"getTareas", idObjetivo });
   if (!r.ok || !r.data.length) {
     lista.innerHTML =
-      `<p style="font-size:13px;color:var(--texto-2)">
-         Sin tareas registradas.</p>`;
+      `<p style="font-size:13px;color:var(--texto-2)">Sin tareas registradas.</p>`;
     return;
   }
   lista.innerHTML = r.data.map(t => `
     <div class="tarea-item ${t.completada ? "completada" : ""}">
       <div class="tarea-check ${t.completada ? "hecho" : ""}"
-           onclick="${t.completada
-             ? ""
-             : `pedirConfirmarTarea('${t.id}','${escapar(t.descripcion)}')`}">
+           onclick="${t.completada ? "" :
+             `pedirConfirmarTarea('${t.id}','${escapar(t.descripcion)}')`}">
         ${t.completada ? "✓" : ""}
       </div>
       <div class="tarea-texto">
         <span class="${t.completada ? "tarea-completada-txt" : ""}">
-          ${t.descripcion}
-        </span>
+          ${t.descripcion}</span>
         ${t.completada ? `
           <div class="tarea-meta">
             Completada por ${t.nombreUsuario} — ${t.fechaCompletado}
@@ -1110,14 +980,10 @@ async function guardarTareaModal() {
   if (!objetivoActual) return;
   const desc = document.getElementById("inp-nueva-tarea").value.trim();
   if (!desc) return;
-
   const r = await api({
-    action:"createTareas",
-    idObjetivo: objetivoActual.id,
-    tareas: [desc]
+    action:"createTareas", idObjetivo:objetivoActual.id, tareas:[desc]
   });
   if (!r.ok) { alert("Error: " + r.error); return; }
-
   ocultarFormTareaModal();
   await cargarTareas(objetivoActual.id);
   await cargarObjetivos();
@@ -1135,22 +1001,15 @@ function cerrarModalConfirmar() {
   document.getElementById("modal-confirmar-tarea").classList.remove("abierto");
   tareaAConfirmar = null;
 }
-
 async function confirmarTarea() {
   if (!tareaAConfirmar) return;
-  const btn =
-    document.querySelector("#modal-confirmar-tarea .btn-success");
+  const btn = document.querySelector("#modal-confirmar-tarea .btn-success");
   btn.textContent = "Guardando…"; btn.disabled = true;
-
   const r = await api({
-    action:"completarTarea",
-    idTarea: tareaAConfirmar,
-    userId:  usuario.id
+    action:"completarTarea", idTarea:tareaAConfirmar, userId:usuario.id
   });
-
   btn.textContent = "Sí, completar"; btn.disabled = false;
   if (!r.ok) { alert("Error: " + r.error); return; }
-
   cerrarModalConfirmar();
   await cargarObjetivos();
   if (objetivoActual) {
@@ -1170,17 +1029,15 @@ async function confirmarTarea() {
   }
 }
 
-// ── Avances — EVIDENCIA DE REGRESO ─────────────────────────
+// ── Avances ─────────────────────────────────────────────────
 async function cargarAvances(idObjetivo) {
   const lista = document.getElementById("avances-lista");
   lista.innerHTML =
     `<div class="loading"><div class="spinner"></div></div>`;
-
   const r = await api({ action:"getAvances", idObjetivo });
   if (!r.ok || !r.data.length) {
     lista.innerHTML =
-      `<p style="font-size:13px;color:var(--texto-2)">
-         Sin avances registrados aún.</p>`;
+      `<p style="font-size:13px;color:var(--texto-2)">Sin avances registrados aún.</p>`;
     return;
   }
   lista.innerHTML = r.data.map(a => `
@@ -1190,56 +1047,36 @@ async function cargarAvances(idObjetivo) {
         <span class="avance-pct">${a.porcentaje}%</span>
       </div>
       <div style="color:var(--texto-2);margin-bottom:4px">
-        ${a.comentario || "Sin comentario"}
-      </div>
+        ${a.comentario || "Sin comentario"}</div>
       ${a.evidenciaLink ? `
         <a href="${a.evidenciaLink}" target="_blank"
-           style="font-size:12px;color:var(--azul)">
-          Ver evidencia →
-        </a>` : ""}
+           style="font-size:12px;color:var(--azul)">Ver evidencia →</a>` : ""}
       <div style="font-size:11px;color:var(--texto-2);margin-top:6px">
-        ${a.fechaRegistro}
-      </div>
+        ${a.fechaRegistro}</div>
     </div>`).join("");
 }
 
-// ════════════════════════════════════════════════════════════
-// GUARDAR AVANCE — evidencia incluida
-// ════════════════════════════════════════════════════════════
 async function guardarAvance() {
   if (!objetivoActual) return;
-
   const pct        = document.getElementById("inp-pct").value;
   const comentario = document.getElementById("inp-comentario").value.trim();
   const evidencia  = document.getElementById("inp-evidencia").value.trim();
-
-  const btn =
-    document.querySelector("#modal-avance-form .btn-success");
+  const btn = document.querySelector("#modal-avance-form .btn-success");
   btn.textContent = "Guardando…"; btn.disabled = true;
-
   const r = await api({
-    action:        "createAvance",
-    idObjetivo:    objetivoActual.id,
-    userId:        usuario.id,
-    porcentaje:    pct,
-    comentario,
-    evidenciaLink: evidencia
+    action:"createAvance", idObjetivo:objetivoActual.id,
+    userId:usuario.id, porcentaje:pct, comentario, evidenciaLink:evidencia
   });
-
   btn.textContent = "Guardar avance"; btn.disabled = false;
   if (!r.ok) { alert("Error: " + r.error); return; }
-
   document.getElementById("inp-comentario").value = "";
   document.getElementById("inp-evidencia").value  = "";
-
   await cargarAvances(objetivoActual.id);
   await cargarObjetivos();
   cerrarModal();
 }
 
-// ════════════════════════════════════════════════════════════
-// TAREAS EN FORMULARIO NUEVO OBJETIVO
-// ════════════════════════════════════════════════════════════
+// ── Nuevo objetivo ──────────────────────────────────────────
 let contadorTareas = 0;
 
 function agregarTareaForm() {
@@ -1264,14 +1101,10 @@ function quitarTareaForm(n) {
 
 function obtenerTareasForm() {
   return Array.from(
-    document.getElementById("tareas-form-lista")
-            .querySelectorAll("input")
+    document.getElementById("tareas-form-lista").querySelectorAll("input")
   ).map(i => i.value.trim()).filter(Boolean);
 }
 
-// ════════════════════════════════════════════════════════════
-// CREAR NUEVO OBJETIVO
-// ════════════════════════════════════════════════════════════
 async function guardarObjetivo() {
   const titulo    = document.getElementById("nv-titulo").value.trim();
   const desc      = document.getElementById("nv-desc").value.trim();
@@ -1280,27 +1113,21 @@ async function guardarObjetivo() {
   const anio      = document.getElementById("nv-anio").value;
   const prioridad = document.getElementById("nv-prioridad").value;
   const tareas    = obtenerTareasForm();
-
-  // Jefe elige asignado; colaborador se asigna a sí mismo
-  const asignado = usuario.rol === "Jefe"
+  const asignado  = usuario.rol === "Jefe"
     ? document.getElementById("nv-asignado").value
     : usuario.id;
 
   if (!titulo)   { mostrarError("nv-error","El título es obligatorio"); return; }
-  if (!asignado) {
-    mostrarError("nv-error","Selecciona a quién asignar el objetivo"); return;
-  }
+  if (!asignado) { mostrarError("nv-error","Selecciona a quién asignar el objetivo"); return; }
   if (!limite)   { mostrarError("nv-error","La fecha límite es obligatoria"); return; }
 
   const btn = document.querySelector("#tab-nuevo .btn-primary");
   btn.textContent = "Guardando…"; btn.disabled = true;
-
   const r = await api({
     action:"createObjetivo", userId:usuario.id,
     titulo, descripcion:desc, idAsignado:asignado,
     fechaInicio:inicio, fechaLimite:limite, anio, prioridad, tareas
   });
-
   btn.textContent = "Guardar objetivo"; btn.disabled = false;
   if (!r.ok) { mostrarError("nv-error", r.error); return; }
 
@@ -1314,23 +1141,18 @@ async function guardarObjetivo() {
   cambiarTab("tab-objetivos");
 }
 
-// ════════════════════════════════════════════════════════════
-// EDITAR OBJETIVO
-// ════════════════════════════════════════════════════════════
+// ── Editar objetivo ─────────────────────────────────────────
 function abrirModalEditar(idObjetivo) {
   const o = objetivos.find(x => x.id === idObjetivo);
   if (!o) return;
   objetivoActual = o;
   cerrarModal();
-
   document.getElementById("ed-titulo").value  = o.titulo;
   document.getElementById("ed-desc").value    = o.descripcion || "";
   document.getElementById("ed-inicio").value  = o.fechaInicio || "";
   document.getElementById("ed-limite").value  = o.fechaLimite || "";
-
   llenarSelectUsuarios("ed-asignado");
   document.getElementById("ed-asignado").value = o.idAsignado;
-
   const selEstado = document.getElementById("ed-estado");
   selEstado.innerHTML = "";
   catalogo.estados.forEach(e => {
@@ -1339,7 +1161,6 @@ function abrirModalEditar(idObjetivo) {
     if (e === o.estado) opt.selected = true;
     selEstado.appendChild(opt);
   });
-
   document.getElementById("ed-prioridad").value     = o.prioridad;
   document.getElementById("ed-error").style.display = "none";
   document.getElementById("modal-editar").classList.add("abierto");
@@ -1360,47 +1181,30 @@ async function guardarEdicion() {
     estado:      document.getElementById("ed-estado").value,
     prioridad:   document.getElementById("ed-prioridad").value
   };
-  if (!campos.titulo) {
-    mostrarError("ed-error","El título es obligatorio"); return;
-  }
-  if (!campos.fechaLimite) {
-    mostrarError("ed-error","La fecha límite es obligatoria"); return;
-  }
-
+  if (!campos.titulo)      { mostrarError("ed-error","El título es obligatorio"); return; }
+  if (!campos.fechaLimite) { mostrarError("ed-error","La fecha límite es obligatoria"); return; }
   const btn = document.querySelector("#modal-editar .btn-primary");
   btn.textContent = "Guardando…"; btn.disabled = true;
-
   const r = await api({
-    action:"updateObjetivo",
-    idObjetivo: objetivoActual.id,
-    campos
+    action:"updateObjetivo", idObjetivo:objetivoActual.id, campos
   });
-
   btn.textContent = "Guardar cambios"; btn.disabled = false;
   if (!r.ok) { mostrarError("ed-error", r.error); return; }
-
   cerrarModalEditar();
   await cargarObjetivos();
 }
 
-// ════════════════════════════════════════════════════════════
-// ELIMINAR OBJETIVO
-// ════════════════════════════════════════════════════════════
+// ── Eliminar objetivo ───────────────────────────────────────
 async function eliminarObjetivo(idObjetivo) {
-  if (!confirm(
-    "¿Seguro que deseas eliminar este objetivo? No se puede deshacer."))
+  if (!confirm("¿Seguro que deseas eliminar este objetivo? No se puede deshacer."))
     return;
-  const r = await api({
-    action:"deleteObjetivo", idObjetivo, rol:usuario.rol
-  });
-  if (!r.ok) { alert("Error: " + r.error); return; }
+  const r = await api({ action:"deleteObjetivo", idObjetivo, rol:usuario.rol });
+  if (!r.ok) { alert("Error: "+r.error); return; }
   cerrarModal();
   await cargarObjetivos();
 }
 
-// ════════════════════════════════════════════════════════════
-// NAVEGACIÓN
-// ════════════════════════════════════════════════════════════
+// ── Navegación ──────────────────────────────────────────────
 function cambiarTab(tabId) {
   ["tab-dashboard","tab-objetivos","tab-nuevo"].forEach(id => {
     document.getElementById(id).style.display =
