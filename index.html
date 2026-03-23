@@ -736,18 +736,18 @@
 
 <script>
 // ════════════════════════════════════════════════════════════
-// CONFIGURACIÓN — pon aquí tu URL de Apps Script
+// CONFIGURACIÓN
 // ════════════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbwem1u7fYg1BhTdOy44VrhhGDqgte4QikxECYbBS6DF1qlsaTgdeCIM8Loj-MEG0HZ6/exec";
+const API_URL = "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT";
 
 // ════════════════════════════════════════════════════════════
 // ESTADO GLOBAL
 // ════════════════════════════════════════════════════════════
-let usuario      = null;   // objeto con id, nombre, rol, etc.
-let objetivos    = [];     // todos los objetivos cargados
-let usuarios     = [];     // lista de colaboradores
-let catalogo     = {};     // { estados: [], prioridades: [] }
-let objetivoActual = null; // objetivo abierto en el modal
+let usuario        = null;
+let objetivos      = [];
+let usuarios       = [];
+let catalogo       = {};
+let objetivoActual = null;
 let graficaEstados = null;
 let graficaColabs  = null;
 
@@ -764,8 +764,8 @@ async function api(body) {
 
 function mostrarError(id, msg) {
   const el = document.getElementById(id);
-  el.textContent = msg;
-  el.style.display = "block";
+  el.textContent    = msg;
+  el.style.display  = "block";
   setTimeout(() => el.style.display = "none", 5000);
 }
 
@@ -789,8 +789,42 @@ function badgeEstado(estado) {
 }
 
 // ════════════════════════════════════════════════════════════
+// SESIÓN — guardar y restaurar con localStorage
+// ════════════════════════════════════════════════════════════
+function guardarSesion(u) {
+  localStorage.setItem("ich_usuario", JSON.stringify(u));
+}
+
+function leerSesion() {
+  try {
+    const raw = localStorage.getItem("ich_usuario");
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function borrarSesion() {
+  localStorage.removeItem("ich_usuario");
+}
+
+// Al cargar la página, revisar si ya había sesión activa
+window.addEventListener("load", () => {
+  const sesionGuardada = leerSesion();
+  if (sesionGuardada) {
+    usuario = sesionGuardada;
+    iniciarApp();
+  }
+  // Si no hay sesión, la pantalla de login ya es visible por defecto
+});
+
+// ════════════════════════════════════════════════════════════
 // LOGIN
 // ════════════════════════════════════════════════════════════
+function resetearBotonLogin() {
+  const btn = document.querySelector("#pantalla-login .btn-primary");
+  btn.textContent = "Iniciar sesión";
+  btn.disabled    = false;
+}
+
 async function hacerLogin() {
   const noEmp = document.getElementById("inp-noemp").value.trim();
   const pass  = document.getElementById("inp-pass").value.trim();
@@ -802,28 +836,28 @@ async function hacerLogin() {
 
   const btn = document.querySelector("#pantalla-login .btn-primary");
   btn.textContent = "Verificando…";
-  btn.disabled = true;
+  btn.disabled    = true;
 
   try {
     const r = await api({ action: "login", noEmpleado: noEmp, contrasena: pass });
 
     if (!r.ok) {
       mostrarError("login-error", r.error);
-      btn.textContent = "Iniciar sesión";
-      btn.disabled = false;
+      resetearBotonLogin();
       return;
     }
 
     usuario = r.usuario;
+    guardarSesion(usuario);   // ← guardar en localStorage
     iniciarApp();
-  } catch {
+
+  } catch (err) {
     mostrarError("login-error", "Error de conexión. Intenta de nuevo.");
-    btn.textContent = "Iniciar sesión";
-    btn.disabled = false;
+    resetearBotonLogin();
   }
 }
 
-// Permitir Enter en el login
+// Enter en el campo de contraseña
 document.getElementById("inp-pass").addEventListener("keydown", e => {
   if (e.key === "Enter") hacerLogin();
 });
@@ -832,15 +866,12 @@ document.getElementById("inp-pass").addEventListener("keydown", e => {
 // INICIO DE LA APP
 // ════════════════════════════════════════════════════════════
 async function iniciarApp() {
-  // Mostrar pantalla principal
   document.getElementById("pantalla-login").style.display = "none";
   document.getElementById("pantalla-app").style.display   = "block";
 
-  // Header
   document.getElementById("hdr-nombre").textContent = usuario.nombre;
   document.getElementById("hdr-rol").textContent    = usuario.rol;
 
-  // Ocultar tab Dashboard y gráficas para colaborador
   if (usuario.rol !== "Jefe") {
     document.getElementById("btn-tab-dashboard").style.display = "none";
     document.getElementById("seccion-graficas").style.display  = "none";
@@ -848,19 +879,19 @@ async function iniciarApp() {
     cambiarTab("tab-objetivos");
   }
 
-  // Cargar catálogo y usuarios en paralelo
   await Promise.all([cargarCatalogo(), cargarUsuarios()]);
-
-  // Cargar objetivos
   await cargarObjetivos();
 
-  // Llenar selects de filtros con estados del catálogo
+  // Poblar filtro de estados
   const filEstado = document.getElementById("fil-estado");
-  catalogo.estados.forEach(e => {
-    const o = document.createElement("option");
-    o.value = o.textContent = e;
-    filEstado.appendChild(o);
-  });
+  // Evitar duplicados si iniciarApp se llama más de una vez
+  if (filEstado.options.length === 1) {
+    catalogo.estados.forEach(e => {
+      const o = document.createElement("option");
+      o.value = o.textContent = e;
+      filEstado.appendChild(o);
+    });
+  }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -881,27 +912,26 @@ async function cargarUsuarios() {
 
   usuarios = r.data;
 
-  // Llenar select de filtro por colaborador
   const filCol = document.getElementById("fil-colaborador");
-  usuarios.forEach(u => {
-    const o = document.createElement("option");
-    o.value = u.id;
-    o.textContent = u.nombre;
-    filCol.appendChild(o);
-  });
+  // Evitar duplicados si se recarga la sesión
+  if (filCol.options.length === 1) {
+    usuarios.forEach(u => {
+      const o = document.createElement("option");
+      o.value       = u.id;
+      o.textContent = u.nombre;
+      filCol.appendChild(o);
+    });
+  }
 
-  // Llenar selects de "asignar a" en el formulario de nuevo objetivo
   llenarSelectUsuarios("nv-asignado");
 }
 
 function llenarSelectUsuarios(selectId) {
   const sel = document.getElementById(selectId);
-  // Limpiar opciones anteriores (salvo la primera)
   while (sel.options.length > 1) sel.remove(1);
-
   usuarios.forEach(u => {
     const o = document.createElement("option");
-    o.value = u.id;
+    o.value       = u.id;
     o.textContent = `${u.nombre} (${u.rol})`;
     sel.appendChild(o);
   });
@@ -930,16 +960,14 @@ async function cargarObjetivos() {
 }
 
 function actualizarResumen() {
-  const total      = objetivos.length;
-  const progreso   = objetivos.filter(o => o.estado === "En progreso").length;
-  const completado = objetivos.filter(o => o.estado === "Completado").length;
-  const atrasado   = objetivos.filter(o =>
-    o.semaforo === "rojo" && o.estado !== "Completado").length;
-
-  document.getElementById("res-total").textContent      = total;
-  document.getElementById("res-progreso").textContent   = progreso;
-  document.getElementById("res-completado").textContent = completado;
-  document.getElementById("res-atrasado").textContent   = atrasado;
+  document.getElementById("res-total").textContent =
+    objetivos.length;
+  document.getElementById("res-progreso").textContent =
+    objetivos.filter(o => o.estado === "En progreso").length;
+  document.getElementById("res-completado").textContent =
+    objetivos.filter(o => o.estado === "Completado").length;
+  document.getElementById("res-atrasado").textContent =
+    objetivos.filter(o => o.semaforo === "rojo" && o.estado !== "Completado").length;
 }
 
 function renderTabla(lista) {
@@ -978,7 +1006,6 @@ function renderTabla(lista) {
   `).join("");
 }
 
-// ── Filtros ─────────────────────────────────────────────────
 function aplicarFiltros() {
   const estado    = document.getElementById("fil-estado").value;
   const colabId   = document.getElementById("fil-colaborador")?.value || "";
@@ -986,10 +1013,10 @@ function aplicarFiltros() {
   const anio      = document.getElementById("fil-anio").value;
 
   const filtrados = objetivos.filter(o => {
-    if (estado    && o.estado    !== estado)    return false;
-    if (colabId   && o.idAsignado !== colabId)  return false;
-    if (prioridad && o.prioridad !== prioridad) return false;
-    if (anio      && String(o.anio) !== anio)   return false;
+    if (estado    && o.estado     !== estado)    return false;
+    if (colabId   && o.idAsignado !== colabId)   return false;
+    if (prioridad && o.prioridad  !== prioridad) return false;
+    if (anio      && String(o.anio) !== anio)    return false;
     return true;
   });
 
@@ -997,10 +1024,9 @@ function aplicarFiltros() {
 }
 
 // ════════════════════════════════════════════════════════════
-// GRÁFICAS (solo Jefe)
+// GRÁFICAS
 // ════════════════════════════════════════════════════════════
 function renderGraficas() {
-  // Gráfica 1: Objetivos por estado (dona)
   const conteoEstados = {};
   objetivos.forEach(o => {
     conteoEstados[o.estado] = (conteoEstados[o.estado] || 0) + 1;
@@ -1033,13 +1059,12 @@ function renderGraficas() {
     }
   });
 
-  // Gráfica 2: Avance promedio por colaborador (barras)
   const porColab = {};
   objetivos.forEach(o => {
-    const nombre = o.nombreAsignado;
-    if (!porColab[nombre]) porColab[nombre] = { suma: 0, total: 0 };
-    porColab[nombre].suma  += o.porcentaje;
-    porColab[nombre].total += 1;
+    const n = o.nombreAsignado;
+    if (!porColab[n]) porColab[n] = { suma: 0, total: 0 };
+    porColab[n].suma  += o.porcentaje;
+    porColab[n].total += 1;
   });
 
   const nombresColab = Object.keys(porColab);
@@ -1080,9 +1105,9 @@ async function abrirModalObjetivo(idObjetivo) {
 
   document.getElementById("modal-titulo").textContent = objetivoActual.titulo;
 
-  // Detalle del objetivo
   document.getElementById("modal-detalle").innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;
+                font-size:13px;margin-bottom:12px">
       <div><span style="color:var(--texto-2)">Asignado a:</span><br>
            <strong>${objetivoActual.nombreAsignado}</strong></div>
       <div><span style="color:var(--texto-2)">Estado:</span><br>
@@ -1105,32 +1130,22 @@ async function abrirModalObjetivo(idObjetivo) {
            ${objetivoActual.descripcion}</p>` : ""}
   `;
 
-  // Poner el slider en el avance actual
   const inpPct = document.getElementById("inp-pct");
   inpPct.value = objetivoActual.porcentaje;
   document.getElementById("pct-label").textContent = objetivoActual.porcentaje + "%";
 
-  // Limpiar campos de avance
   document.getElementById("inp-comentario").value = "";
   document.getElementById("inp-evidencia").value  = "";
 
-  // Botones del Jefe (editar / eliminar)
   const footer = document.getElementById("modal-footer-jefe");
-  if (usuario.rol === "Jefe") {
-    footer.innerHTML = `
-      <button class="btn btn-secondary btn-sm"
-              onclick="abrirModalEditar('${idObjetivo}')">Editar objetivo</button>
-      <button class="btn btn-danger btn-sm"
-              onclick="eliminarObjetivo('${idObjetivo}')">Eliminar</button>
-    `;
-  } else {
-    footer.innerHTML = "";
-  }
+  footer.innerHTML = usuario.rol === "Jefe" ? `
+    <button class="btn btn-secondary btn-sm"
+            onclick="abrirModalEditar('${idObjetivo}')">Editar objetivo</button>
+    <button class="btn btn-danger btn-sm"
+            onclick="eliminarObjetivo('${idObjetivo}')">Eliminar</button>
+  ` : "";
 
-  // Mostrar modal
   document.getElementById("modal-objetivo").classList.add("abierto");
-
-  // Cargar historial de avances
   cargarAvances(idObjetivo);
 }
 
@@ -1157,11 +1172,13 @@ async function cargarAvances(idObjetivo) {
         <span>${a.nombreUsuario}</span>
         <span class="avance-pct">${a.porcentaje}%</span>
       </div>
-      <div style="color:var(--texto-2);margin-bottom:4px">${a.comentario || "Sin comentario"}</div>
+      <div style="color:var(--texto-2);margin-bottom:4px">
+        ${a.comentario || "Sin comentario"}</div>
       ${a.evidenciaLink
         ? `<a href="${a.evidenciaLink}" target="_blank"
               style="font-size:12px;color:var(--azul)">Ver evidencia →</a>` : ""}
-      <div style="font-size:11px;color:var(--texto-2);margin-top:6px">${a.fechaRegistro}</div>
+      <div style="font-size:11px;color:var(--texto-2);margin-top:6px">
+        ${a.fechaRegistro}</div>
     </div>
   `).join("");
 }
@@ -1172,13 +1189,13 @@ async function cargarAvances(idObjetivo) {
 async function guardarAvance() {
   if (!objetivoActual) return;
 
-  const pct      = document.getElementById("inp-pct").value;
+  const pct         = document.getElementById("inp-pct").value;
   const comentario  = document.getElementById("inp-comentario").value.trim();
   const evidencia   = document.getElementById("inp-evidencia").value.trim();
 
   const btn = document.querySelector("#modal-avance-form .btn-success");
   btn.textContent = "Guardando…";
-  btn.disabled = true;
+  btn.disabled    = true;
 
   const r = await api({
     action:        "createAvance",
@@ -1190,11 +1207,10 @@ async function guardarAvance() {
   });
 
   btn.textContent = "Guardar avance";
-  btn.disabled = false;
+  btn.disabled    = false;
 
   if (!r.ok) { alert("Error: " + r.error); return; }
 
-  // Recargar todo
   cargarAvances(objetivoActual.id);
   await cargarObjetivos();
   cerrarModal();
@@ -1218,7 +1234,7 @@ async function guardarObjetivo() {
 
   const btn = document.querySelector("#tab-nuevo .btn-primary");
   btn.textContent = "Guardando…";
-  btn.disabled = true;
+  btn.disabled    = true;
 
   const r = await api({
     action:      "createObjetivo",
@@ -1233,22 +1249,21 @@ async function guardarObjetivo() {
   });
 
   btn.textContent = "Guardar objetivo";
-  btn.disabled = false;
+  btn.disabled    = false;
 
   if (!r.ok) { mostrarError("nv-error", r.error); return; }
 
-  // Limpiar form y regresar a la tabla
-  document.getElementById("nv-titulo").value = "";
-  document.getElementById("nv-desc").value   = "";
-  document.getElementById("nv-asignado").value = "";
-  document.getElementById("nv-limite").value = "";
+  document.getElementById("nv-titulo").value    = "";
+  document.getElementById("nv-desc").value      = "";
+  document.getElementById("nv-asignado").value  = "";
+  document.getElementById("nv-limite").value    = "";
 
   await cargarObjetivos();
   cambiarTab("tab-objetivos");
 }
 
 // ════════════════════════════════════════════════════════════
-// MODAL: EDITAR OBJETIVO (solo Jefe)
+// MODAL: EDITAR OBJETIVO
 // ════════════════════════════════════════════════════════════
 function abrirModalEditar(idObjetivo) {
   const o = objetivos.find(x => x.id === idObjetivo);
@@ -1257,16 +1272,14 @@ function abrirModalEditar(idObjetivo) {
 
   cerrarModal();
 
-  document.getElementById("ed-titulo").value    = o.titulo;
-  document.getElementById("ed-desc").value      = o.descripcion || "";
-  document.getElementById("ed-inicio").value    = o.fechaInicio || "";
-  document.getElementById("ed-limite").value    = o.fechaLimite || "";
+  document.getElementById("ed-titulo").value  = o.titulo;
+  document.getElementById("ed-desc").value    = o.descripcion || "";
+  document.getElementById("ed-inicio").value  = o.fechaInicio || "";
+  document.getElementById("ed-limite").value  = o.fechaLimite || "";
 
-  // Llenar select de asignado
   llenarSelectUsuarios("ed-asignado");
   document.getElementById("ed-asignado").value = o.idAsignado;
 
-  // Llenar select de estados
   const selEstado = document.getElementById("ed-estado");
   selEstado.innerHTML = "";
   catalogo.estados.forEach(e => {
@@ -1276,9 +1289,8 @@ function abrirModalEditar(idObjetivo) {
     selEstado.appendChild(opt);
   });
 
-  document.getElementById("ed-prioridad").value = o.prioridad;
+  document.getElementById("ed-prioridad").value     = o.prioridad;
   document.getElementById("ed-error").style.display = "none";
-
   document.getElementById("modal-editar").classList.add("abierto");
 }
 
@@ -1299,21 +1311,21 @@ async function guardarEdicion() {
     prioridad:   document.getElementById("ed-prioridad").value
   };
 
-  if (!campos.titulo)   { mostrarError("ed-error", "El título es obligatorio"); return; }
+  if (!campos.titulo)      { mostrarError("ed-error", "El título es obligatorio"); return; }
   if (!campos.fechaLimite) { mostrarError("ed-error", "La fecha límite es obligatoria"); return; }
 
   const btn = document.querySelector("#modal-editar .btn-primary");
   btn.textContent = "Guardando…";
-  btn.disabled = true;
+  btn.disabled    = true;
 
   const r = await api({
-    action:      "updateObjetivo",
-    idObjetivo:  objetivoActual.id,
+    action:     "updateObjetivo",
+    idObjetivo: objetivoActual.id,
     campos
   });
 
   btn.textContent = "Guardar cambios";
-  btn.disabled = false;
+  btn.disabled    = false;
 
   if (!r.ok) { mostrarError("ed-error", r.error); return; }
 
@@ -1322,16 +1334,16 @@ async function guardarEdicion() {
 }
 
 // ════════════════════════════════════════════════════════════
-// ELIMINAR OBJETIVO (solo Jefe)
+// ELIMINAR OBJETIVO
 // ════════════════════════════════════════════════════════════
 async function eliminarObjetivo(idObjetivo) {
-  if (!confirm("¿Seguro que deseas eliminar este objetivo? Esta acción no se puede deshacer."))
+  if (!confirm("¿Seguro que deseas eliminar este objetivo? No se puede deshacer."))
     return;
 
   const r = await api({
-    action:      "deleteObjetivo",
+    action:     "deleteObjetivo",
     idObjetivo,
-    rol:         usuario.rol
+    rol:        usuario.rol
   });
 
   if (!r.ok) { alert("Error: " + r.error); return; }
@@ -1344,22 +1356,30 @@ async function eliminarObjetivo(idObjetivo) {
 // NAVEGACIÓN
 // ════════════════════════════════════════════════════════════
 function cambiarTab(tabId) {
-  ["tab-dashboard", "tab-objetivos", "tab-nuevo"].forEach(id => {
+  ["tab-dashboard","tab-objetivos","tab-nuevo"].forEach(id => {
     document.getElementById(id).style.display = id === tabId ? "block" : "none";
   });
-
   document.querySelectorAll(".tab").forEach(btn => {
     btn.classList.toggle("activo", btn.dataset.tab === tabId);
   });
 }
 
 function cerrarSesion() {
-  usuario = null;
-  objetivos = [];
-  document.getElementById("pantalla-app").style.display  = "none";
-  document.getElementById("pantalla-login").style.display = "flex";
+  borrarSesion();           // ← limpiar localStorage
+  usuario     = null;
+  objetivos   = [];
+  usuarios    = [];
+  catalogo    = {};
+
+  // Resetear botón de login por si quedó atascado
+  resetearBotonLogin();
+
+  // Limpiar campos del login
   document.getElementById("inp-noemp").value = "";
   document.getElementById("inp-pass").value  = "";
+
+  document.getElementById("pantalla-app").style.display   = "none";
+  document.getElementById("pantalla-login").style.display = "flex";
 }
 
 // Cerrar modales con Escape
