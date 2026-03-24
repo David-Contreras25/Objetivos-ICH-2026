@@ -534,6 +534,7 @@
       <button class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
       <button class="btn btn-primary"   onclick="guardarEdicion()">Guardar cambios</button>
     </div>
+    <input type="hidden" id="ed-id-objetivo"/>
     <div class="error-msg" id="ed-error"></div>
   </div>
 </div>
@@ -1137,12 +1138,18 @@ function abrirModalEditar(idObjetivo) {
   if (!o) return;
   objetivoActual = o;
   cerrarModal();
+
+  // Guardar el ID en un campo oculto para que guardarEdicion lo encuentre
+  document.getElementById("ed-id-objetivo").value = idObjetivo;
+
   document.getElementById("ed-titulo").value  = o.titulo;
   document.getElementById("ed-desc").value    = o.descripcion || "";
   document.getElementById("ed-inicio").value  = o.fechaInicio || "";
   document.getElementById("ed-limite").value  = o.fechaLimite || "";
+
   llenarSelectUsuarios("ed-asignado");
   document.getElementById("ed-asignado").value = o.idAsignado;
+
   const selEstado = document.getElementById("ed-estado");
   selEstado.innerHTML = "";
   catalogo.estados.forEach(e => {
@@ -1151,6 +1158,7 @@ function abrirModalEditar(idObjetivo) {
     if (e === o.estado) opt.selected = true;
     selEstado.appendChild(opt);
   });
+
   document.getElementById("ed-prioridad").value     = o.prioridad;
   document.getElementById("ed-error").style.display = "none";
   document.getElementById("modal-editar").classList.add("abierto");
@@ -1161,7 +1169,10 @@ function cerrarModalEditar() {
 }
 
 async function guardarEdicion() {
-  if (!objetivoActual) return;
+  // Leer el id directamente del campo oculto en lugar de objetivoActual
+  const idObjetivo = document.getElementById("ed-id-objetivo").value;
+  if (!idObjetivo) { mostrarError("ed-error","No se encontró el objetivo"); return; }
+
   const campos = {
     titulo:      document.getElementById("ed-titulo").value.trim(),
     descripcion: document.getElementById("ed-desc").value.trim(),
@@ -1173,13 +1184,15 @@ async function guardarEdicion() {
   };
   if (!campos.titulo)      { mostrarError("ed-error","El título es obligatorio"); return; }
   if (!campos.fechaLimite) { mostrarError("ed-error","La fecha límite es obligatoria"); return; }
+
   const btn = document.querySelector("#modal-editar .btn-primary");
   btn.textContent = "Guardando…"; btn.disabled = true;
-  const r = await api({
-    action:"updateObjetivo", idObjetivo:objetivoActual.id, campos
-  });
+
+  const r = await api({ action:"updateObjetivo", idObjetivo, campos });
+
   btn.textContent = "Guardar cambios"; btn.disabled = false;
   if (!r.ok) { mostrarError("ed-error", r.error); return; }
+
   cerrarModalEditar();
   await cargarObjetivos();
 }
