@@ -455,14 +455,7 @@
     <!-- Registrar avance -->
     <div id="modal-avance-form"
          style="margin-top:20px;border-top:1px solid var(--borde);padding-top:20px">
-      <h4 style="font-size:14px;margin-bottom:12px">Registrar avance</h4>
-      <div class="campo">
-        <label>Porcentaje de avance:
-          <strong id="pct-label">0%</strong>
-        </label>
-        <input type="range" id="inp-pct" min="0" max="100" value="0"
-               oninput="document.getElementById('pct-label').textContent=this.value+'%'"/>
-      </div>
+      <h4 style="font-size:14px;margin-bottom:12px">Comentario y evidencia</h4>
       <div class="campo">
         <label>Comentario</label>
         <textarea id="inp-comentario"
@@ -1058,7 +1051,7 @@ async function cargarAvances(idObjetivo) {
 
 async function guardarAvance() {
   if (!objetivoActual) return;
-  const pct        = document.getElementById("inp-pct").value;
+  const pct = objetivoActual ? objetivoActual.porcentaje : 0;
   const comentario = document.getElementById("inp-comentario").value.trim();
   const evidencia  = document.getElementById("inp-evidencia").value.trim();
   const btn = document.querySelector("#modal-avance-form .btn-success");
