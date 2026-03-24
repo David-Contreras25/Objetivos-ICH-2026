@@ -907,9 +907,6 @@ async function abrirModalObjetivo(idObjetivo) {
               onclick="abrirModalEditar('${idObjetivo}')">Editar objetivo</button>
       <button class="btn btn-danger btn-sm"
               onclick="eliminarObjetivo('${idObjetivo}')">Eliminar</button>` : "";
-
-  document.getElementById("inp-pct").value          = objetivoActual.porcentaje;
-  document.getElementById("pct-label").textContent  = objetivoActual.porcentaje + "%";
   document.getElementById("inp-comentario").value   = "";
   document.getElementById("inp-evidencia").value    = "";
 
