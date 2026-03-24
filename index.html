@@ -463,7 +463,7 @@
       </div>
       <div class="campo">
         <label>Evidencia (link de Drive u otro)</label>
-        <input type="" id="inp-evidencia"
+        <input type="url" id="inp-evidencia"
                placeholder="https://drive.google.com/…"/>
       </div>
       <button class="btn btn-success btn-sm"
@@ -471,6 +471,29 @@
     </div>
 
     <!-- Historial de avances -->
+    <!-- Revisiones -->
+<div style="margin-top:20px;border-top:1px solid var(--borde);padding-top:16px">
+  <div style="display:flex;justify-content:space-between;
+              align-items:center;margin-bottom:12px">
+    <h4 style="font-size:14px">Revisiones</h4>
+    <button class="btn btn-secondary btn-xs"
+            onclick="mostrarFormRevision()">+ Proponer fecha</button>
+  </div>
+  <div id="form-revision" style="display:none;margin-bottom:12px">
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div class="campo" style="margin:0;flex:1">
+        <label>Fecha propuesta</label>
+        <input type="date" id="inp-fecha-revision" style="margin:0"/>
+      </div>
+      <button class="btn btn-success btn-sm"
+              onclick="guardarRevision()">Proponer</button>
+      <button class="btn btn-secondary btn-sm"
+              onclick="ocultarFormRevision()">×</button>
+    </div>
+  </div>
+  <div id="revisiones-lista"></div>
+</div>
+     <!-- Revisiones fin -->
     <div style="margin-top:20px;border-top:1px solid var(--borde);padding-top:16px">
       <h4 style="font-size:14px;margin-bottom:12px">Historial de avances</h4>
       <div id="avances-lista"></div>
@@ -914,9 +937,10 @@ async function abrirModalObjetivo(idObjetivo) {
   document.getElementById("modal-objetivo").classList.add("abierto");
   ocultarFormTareaModal();
 
-  await Promise.all([
+    await Promise.all([
     cargarTareas(idObjetivo),
-    cargarAvances(idObjetivo)
+    cargarAvances(idObjetivo),
+    cargarRevisiones(idObjetivo)
   ]);
 }
 
@@ -1227,7 +1251,165 @@ function cerrarSesion() {
   document.getElementById("pantalla-app").style.display   = "none";
   document.getElementById("pantalla-login").style.display = "flex";
 }
+// ════════════════════════════════════════════════════════════
+// REVISIONES
+// ════════════════════════════════════════════════════════════
+function mostrarFormRevision() {
+  document.getElementById("form-revision").style.display = "block";
+  document.getElementById("inp-fecha-revision").focus();
+}
 
+function ocultarFormRevision() {
+  document.getElementById("form-revision").style.display = "none";
+  document.getElementById("inp-fecha-revision").value = "";
+}
+
+async function guardarRevision() {
+  if (!objetivoActual) return;
+  const fecha = document.getElementById("inp-fecha-revision").value;
+  if (!fecha) { alert("Selecciona una fecha"); return; }
+
+  const btn = document.querySelector("#form-revision .btn-success");
+  btn.textContent = "Guardando…"; btn.disabled = true;
+
+  const r = await api({
+    action:         "createRevision",
+    idObjetivo:     objetivoActual.id,
+    fechaPropuesta: fecha,
+    userId:         usuario.id
+  });
+
+  btn.textContent = "Proponer"; btn.disabled = false;
+  if (!r.ok) { alert("Error: " + r.error); return; }
+
+  ocultarFormRevision();
+  cargarRevisiones(objetivoActual.id);
+}
+
+async function cargarRevisiones(idObjetivo) {
+  const lista = document.getElementById("revisiones-lista");
+  lista.innerHTML =
+    `<div class="loading"><div class="spinner"></div></div>`;
+
+  const r = await api({ action:"getRevisiones", idObjetivo });
+
+  if (!r.ok || !r.data.length) {
+    lista.innerHTML =
+      `<p style="font-size:13px;color:var(--texto-2)">
+         Sin revisiones programadas.</p>`;
+    return;
+  }
+
+  const colorEstado = {
+    "Pendiente":  "#d69e2e",
+    "Confirmada": "#38a169",
+    "Rechazada":  "#e53e3e",
+    "Realizada":  "#3182ce"
+  };
+
+  lista.innerHTML = r.data.map(rev => `
+    <div style="border:1px solid var(--borde);border-radius:var(--radio);
+                padding:12px;margin-bottom:8px;font-size:13px">
+      <div style="display:flex;justify-content:space-between;
+                  align-items:center;margin-bottom:6px">
+        <strong>${formatFecha(rev.fechaPropuesta)}</strong>
+        <span style="font-size:11px;font-weight:600;padding:2px 8px;
+                     border-radius:20px;
+                     background:${colorEstado[rev.estadoRevision]}20;
+                     color:${colorEstado[rev.estadoRevision]}">
+          ${rev.estadoRevision}
+        </span>
+      </div>
+      <div style="color:var(--texto-2);margin-bottom:6px">
+        Propuesta por: ${rev.nombrePropuesto}
+      </div>
+      ${rev.nota ? `
+        <div style="font-size:12px;color:var(--texto-2);
+                    border-left:2px solid var(--borde);padding-left:8px">
+          ${rev.nota}
+        </div>` : ""}
+      ${rev.estadoRevision === "Pendiente" && usuario.rol === "Jefe"
+        && rev.propuestaPor !== usuario.id ? `
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-success btn-xs"
+                  onclick="responderRevision('${rev.id}','Confirmada')">
+            Confirmar
+          </button>
+          <button class="btn btn-danger btn-xs"
+                  onclick="responderRevision('${rev.id}','Rechazada')">
+            Rechazar
+          </button>
+        </div>` : ""}
+      ${rev.estadoRevision === "Confirmada" && usuario.rol === "Jefe" ? `
+        <div style="margin-top:8px">
+          <button class="btn btn-secondary btn-xs"
+                  onclick="abrirRegistroResultado('${rev.id}')">
+            Registrar resultado
+          </button>
+        </div>` : ""}
+    </div>`).join("");
+}
+
+async function responderRevision(idRevision, respuesta) {
+  const r = await api({
+    action:"responderRevision",
+    idRevision, respuesta, userId:usuario.id
+  });
+  if (!r.ok) { alert("Error: " + r.error); return; }
+  cargarRevisiones(objetivoActual.id);
+}
+
+function abrirRegistroResultado(idRevision) {
+  const formId = `form-resultado-${idRevision}`;
+  if (document.getElementById(formId)) return;
+
+  const btn = document.querySelector(
+    `button[onclick="abrirRegistroResultado('${idRevision}')"]`);
+  if (!btn) return;
+
+  const div = document.createElement("div");
+  div.id = formId;
+  div.style.cssText = "margin-top:8px";
+  div.innerHTML = `
+    <div class="campo" style="margin-bottom:6px">
+      <label style="font-size:12px">¿Se realizó la revisión?</label>
+      <select id="sel-realizada-${idRevision}"
+              style="font-size:12px;padding:6px">
+        <option value="true">Sí, se realizó</option>
+        <option value="false">No se realizó</option>
+      </select>
+    </div>
+    <div class="campo" style="margin-bottom:6px">
+      <label style="font-size:12px">Nota / resultado</label>
+      <textarea id="nota-${idRevision}"
+                style="font-size:12px;min-height:60px"
+                placeholder="Escribe los acuerdos o motivo…"></textarea>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-primary btn-xs"
+              onclick="guardarResultado('${idRevision}')">Guardar</button>
+      <button class="btn btn-secondary btn-xs"
+              onclick="document.getElementById('${formId}').remove()">
+        Cancelar
+      </button>
+    </div>`;
+  btn.parentElement.appendChild(div);
+}
+
+async function guardarResultado(idRevision) {
+  const realizada = document.getElementById(
+    `sel-realizada-${idRevision}`).value === "true";
+  const nota = document.getElementById(
+    `nota-${idRevision}`).value.trim();
+
+  const r = await api({
+    action:"registrarResultado",
+    idRevision, realizada, nota, userId:usuario.id
+  });
+  if (!r.ok) { alert("Error: " + r.error); return; }
+  cargarRevisiones(objetivoActual.id);
+}
+  
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") {
     cerrarModal(); cerrarModalEditar(); cerrarModalConfirmar();
